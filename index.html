@@ -52,6 +52,14 @@
   #msg { position: fixed; bottom: 84px; right: 16px; left: 16px; max-width: 520px; margin: 0 auto;
     background: var(--ink); color: #fff; padding: 12px 16px; border-radius: 8px; display: none; z-index: 10; }
   .empty { text-align: center; color: var(--muted); padding: 40px 0; }
+  .bubbles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .b { max-width: 85%; padding: 8px 12px; border-radius: 14px; background: var(--card);
+    border: 1px solid var(--line); word-break: break-word; white-space: pre-wrap; align-self: flex-end; }
+  .b.me { align-self: flex-start; background: var(--accent); color: #fff; border-color: var(--accent); }
+  .bn { font-size: 12px; font-weight: bold; color: var(--accent); text-decoration: none; display: block; }
+  .b.me .bn { color: #fff; }
+  .bt { font-size: 11px; opacity: .7; }
+  .sendbar { display: flex; gap: 8px; position: sticky; bottom: 72px; background: var(--bg); padding: 8px 0; }
 </style>
 </head>
 <body>
@@ -67,6 +75,7 @@
   <a href="#/posts" data-p="posts"><span class="ic">⌂</span>پست‌ها</a>
   <a href="#/search" data-p="search"><span class="ic">⌕</span>جستجو</a>
   <a href="#/new" data-p="new"><span class="ic">＋</span>پست جدید</a>
+  <a href="#/chat" data-p="chat"><span class="ic">✉</span>چت</a>
   <a href="#/me" data-p="me"><span class="ic">☺</span>صفحه من</a>
 </nav>
 
@@ -80,6 +89,7 @@ const CONFIG = {
   databaseId: '6acf982f001971779a2c',
   collectionId: '6acf990e0020720c9550',
   bucketId: '6acf9c8b003cff99b09a',
+  messagesId: '6ad0beeb0037f9256400',
   maxFileMB: 20,
   maxVideoSeconds: 60,
   maxImageWidth: 1280,
@@ -391,13 +401,69 @@ function viewNew() {
   view.append(h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'پست جدید'), file, text, btn, status));
 }
 
+// ---------- چت عمومی ----------
+let chatTimer = null;
+async function viewChat() {
+  if (!user) { toast('اول وارد شو'); location.hash = '#/login'; return; }
+  view.innerHTML = '';
+  if (!CONFIG.messagesId || CONFIG.messagesId.startsWith('YOUR')) {
+    view.innerHTML = '<div class="empty">چت هنوز تنظیم نشده.</div>'; return;
+  }
+  const box = h('div', { class: 'bubbles' });
+  const input = h('input', { placeholder: 'پیام بنویس...', maxlength: '500', style: 'flex:1;margin:0' });
+  const send = h('button', {}, 'ارسال');
+  view.append(
+    h('p', { class: 'muted' }, 'چت عمومی: همه‌ی کاربرا این پیام‌ها رو می‌بینن. پیام‌ها بعد از ' + CONFIG.keepDays + ' روز پاک می‌شن.'),
+    box, h('div', { class: 'sendbar' }, input, send));
+  let lastKey = null;
+  const draw = msgs => {
+    const key = msgs.map(m => m.$id).join(',');
+    if (key === lastKey) return;
+    lastKey = key;
+    box.innerHTML = '';
+    if (!msgs.length) box.append(h('div', { class: 'empty' }, 'هنوز پیامی نیست. اولین نفر باش.'));
+    msgs.forEach(m => box.append(h('div', { class: 'b' + (m.userId === user.$id ? ' me' : '') },
+      h('a', { class: 'bn', href: '#/u/' + m.userId }, m.userName || 'کاربر'),
+      h('div', {}, m.text),
+      h('div', { class: 'bt' }, timeAgo(m.$createdAt)))));
+    window.scrollTo(0, document.body.scrollHeight);
+  };
+  const load = async () => {
+    try {
+      const res = await databases.listDocuments(CONFIG.databaseId, CONFIG.messagesId,
+        [Query.orderDesc('$createdAt'), Query.limit(50)]);
+      draw(res.documents.slice().reverse());
+    } catch (e) {
+      lastKey = null;
+      box.innerHTML = '<div class="empty">پیام‌ها بارگذاری نشد: ' + (e.message || '') + '</div>';
+    }
+  };
+  send.onclick = async () => {
+    const t = input.value.trim();
+    if (!t) return;
+    send.disabled = true;
+    try {
+      await databases.createDocument(CONFIG.databaseId, CONFIG.messagesId, ID.unique(), {
+        userId: user.$id, userName: user.name || user.email.split('@')[0], text: t
+      }, [Permission.delete(Role.user(user.$id))]);
+      input.value = ''; await load();
+    } catch (e) { toast(e.message || 'ارسال نشد'); }
+    send.disabled = false;
+  };
+  input.onkeydown = e => { if (e.key === 'Enter') send.onclick(); };
+  await load();
+  chatTimer = setInterval(load, 5000);
+}
+
 // ---------- مسیریابی ----------
 function route() {
   const parts = (location.hash || '#/posts').split('/');
   const page = parts[1] || 'posts', arg = parts[2];
   document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.p === page));
-  window.scrollTo(0, 0);
-  if (page === 'search') viewSearch();
+  clearInterval(chatTimer);
+  if (page !== 'chat') window.scrollTo(0, 0);
+  if (page === 'chat') viewChat();
+  else if (page === 'search') viewSearch();
   else if (page === 'u' && arg) viewProfile(arg);
   else if (page === 'me') { if (!user) location.hash = '#/login'; else viewProfile(user.$id); }
   else if (page === 'new') viewNew();
