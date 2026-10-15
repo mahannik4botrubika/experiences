@@ -1,0 +1,24 @@
+name: Weekly cleanup
+
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Delete old posts and files
+        run: node cleanup.mjs
+        env:
+          APPWRITE_ENDPOINT: https://fra.cloud.appwrite.io/v1
+          APPWRITE_PROJECT: 6ace411d003d049156b2
+          APPWRITE_DB: 6acf982f001971779a2c
+          APPWRITE_COLLECTION: 6acf990e0020720c9550
+          APPWRITE_BUCKET: 6acf9c8b003cff99b09a
+          APPWRITE_KEY: ${{ secrets.APPWRITE_KEY }}
