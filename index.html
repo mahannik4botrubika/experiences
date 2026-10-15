@@ -329,8 +329,24 @@ function viewLogin() {
       h('button', { onclick: async () => { try { await login(); } catch (e) { toast(e.message || 'ورود انجام نشد'); } } }, 'ورود'),
       h('button', { class: 'ghost', onclick: async () => {
         if (!name.value.trim()) return toast('اسمت رو بنویس');
-        try { await account.create(ID.unique(), email.value.trim(), pass.value, name.value.trim()); await login(); }
+        try {
+          await account.create(ID.unique(), email.value.trim(), pass.value, name.value.trim());
+          await login();
+          try { await account.createVerification(location.origin + location.pathname); toast('ایمیل تأیید برات فرستاده شد'); } catch {}
+        }
         catch (e) { toast(e.message || 'ثبت‌نام انجام نشد'); } } }, 'ثبت‌نام'))));
+}
+
+// ---------- تأیید ایمیل ----------
+function verifyNotice() {
+  return h('section', { class: 'box' },
+    h('h2', { style: 'margin-top:0' }, 'ایمیلت رو تأیید کن'),
+    h('p', {}, 'برای پست گذاشتن و چت کردن باید ایمیلت تأیید بشه. یه ایمیل با لینک تأیید برات فرستادیم (پوشه‌ی اسپم رو هم نگاه کن). لینک رو تو همین مرورگر باز کن.'),
+    h('div', { class: 'row' },
+      h('button', { onclick: async () => {
+        try { await account.createVerification(location.origin + location.pathname); toast('ایمیل دوباره فرستاده شد'); }
+        catch (e) { toast(e.message || 'ارسال نشد'); } } }, 'ارسال دوباره ایمیل'),
+      h('button', { class: 'ghost', onclick: async () => { await checkUser(); route(); } }, 'تأیید کردم')));
 }
 
 // ---------- پست جدید ----------
@@ -361,6 +377,7 @@ function videoDuration(file) {
 function viewNew() {
   if (!user) { toast('اول وارد شو'); location.hash = '#/login'; return; }
   view.innerHTML = '';
+  if (!user.emailVerification) { view.append(verifyNotice()); return; }
   const file = h('input', { type: 'file', accept: 'image/*,video/*' });
   const text = h('textarea', { rows: '5', maxlength: '2000', placeholder: 'تجربه‌ات رو بنویس (عکس یا ویدیو اختیاریه)' });
   const status = h('p', { class: 'muted' });
@@ -406,6 +423,7 @@ let chatTimer = null;
 async function viewChat() {
   if (!user) { toast('اول وارد شو'); location.hash = '#/login'; return; }
   view.innerHTML = '';
+  if (!user.emailVerification) { view.append(verifyNotice()); return; }
   if (!CONFIG.messagesId || CONFIG.messagesId.startsWith('YOUR')) {
     view.innerHTML = '<div class="empty">چت هنوز تنظیم نشده.</div>'; return;
   }
@@ -471,7 +489,15 @@ function route() {
   else viewPosts();
 }
 window.addEventListener('hashchange', route);
-checkUser().then(route);
+(async () => {
+  const qs = new URLSearchParams(location.search);
+  if (qs.get('userId') && qs.get('secret')) {
+    try { await account.updateVerification(qs.get('userId'), qs.get('secret')); toast('ایمیلت تأیید شد'); }
+    catch (e) { toast('لینک تأیید معتبر نیست یا باید تو همون مرورگری که واردش شدی بازش کنی'); }
+    history.replaceState(null, '', location.pathname + (location.hash || ''));
+  }
+  await checkUser(); route();
+})();
 </script>
 </body>
 </html>
