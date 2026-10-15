@@ -14,17 +14,20 @@
   }
   * { box-sizing: border-box; }
   body { margin: 0; background: var(--bg); color: var(--ink);
-    font-family: Tahoma, "Segoe UI", system-ui, sans-serif; line-height: 1.7; }
-  header { display: flex; align-items: center; justify-content: space-between;
-    padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--line);
-    position: sticky; top: 0; z-index: 5; }
+    font-family: Tahoma, "Segoe UI", system-ui, sans-serif; line-height: 1.7; padding-bottom: 76px; }
+  header { padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--line);
+    position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; }
   header h1 { font-size: 20px; margin: 0; }
   main { max-width: 560px; margin: 0 auto; padding: 16px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px;
-    margin-bottom: 16px; overflow: hidden; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
   .card .head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; }
+  .who { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font-weight: bold; }
+  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #fff;
+    display: inline-flex; align-items: center; justify-content: center; font-weight: bold; flex: none; }
+  .avatar.big { width: 72px; height: 72px; font-size: 30px; }
   .card img, .card video { width: 100%; display: block; background: #000; max-height: 80vh; object-fit: contain; }
-  .card p { margin: 0; padding: 12px 14px; white-space: pre-wrap; }
+  .card p { margin: 0; padding: 12px 14px; white-space: pre-wrap; word-break: break-word; }
+  .card p.only { font-size: 18px; padding: 22px 16px; }
   .card .time { font-size: 12px; color: var(--muted); padding: 0 14px 12px; }
   input, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line);
     border-radius: 8px; font: inherit; margin-bottom: 10px; background: #fff; }
@@ -33,12 +36,21 @@
   button.ghost { background: transparent; color: var(--accent); }
   button.danger { background: transparent; color: var(--danger); border-color: var(--danger); padding: 4px 10px; font-size: 13px; }
   button:disabled { opacity: .5; cursor: default; }
-  button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid #f0b429; outline-offset: 2px; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid #f0b429; outline-offset: 2px; }
   .box { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; }
-  #msg { position: fixed; bottom: 16px; right: 16px; left: 16px; max-width: 520px; margin: 0 auto;
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .profile-head { display: flex; gap: 16px; align-items: center; }
+  .profile-head h2 { margin: 0; }
+  .muted { color: var(--muted); font-size: 14px; }
+  .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line);
+    border-radius: 999px; padding: 4px 12px 4px 6px; margin: 0 0 8px 8px; text-decoration: none; color: inherit; }
+  nav { position: fixed; bottom: 0; right: 0; left: 0; background: var(--card); border-top: 1px solid var(--line);
+    display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px)); z-index: 6; }
+  nav a { flex: 1; text-align: center; text-decoration: none; color: var(--muted); font-size: 13px; padding: 4px 0; }
+  nav a.on { color: var(--accent); font-weight: bold; }
+  nav a .ic { display: block; font-size: 20px; line-height: 1.2; }
+  #msg { position: fixed; bottom: 84px; right: 16px; left: 16px; max-width: 520px; margin: 0 auto;
     background: var(--ink); color: #fff; padding: 12px 16px; border-radius: 8px; display: none; z-index: 10; }
-  .hidden { display: none !important; }
   .empty { text-align: center; color: var(--muted); padding: 40px 0; }
 </style>
 </head>
@@ -46,44 +58,22 @@
 
 <header>
   <h1>تجربه‌ها</h1>
-  <div class="row">
-    <button id="newBtn" class="hidden">پست جدید</button>
-    <button id="logoutBtn" class="ghost hidden">خروج</button>
-  </div>
+  <button id="loginTop" class="ghost" style="display:none">ورود / ثبت‌نام</button>
 </header>
 
-<main>
-  <!-- ورود / ثبت‌نام -->
-  <section id="authBox" class="box hidden">
-    <h2 style="margin-top:0">ورود یا ثبت‌نام</h2>
-    <input id="email" type="email" placeholder="ایمیل" dir="ltr">
-    <input id="pass" type="password" placeholder="رمز عبور (حداقل ۸ کاراکتر)" dir="ltr">
-    <div class="row">
-      <button id="loginBtn">ورود</button>
-      <button id="registerBtn" class="ghost">ثبت‌نام</button>
-    </div>
-  </section>
+<main id="view"></main>
 
-  <!-- پست جدید -->
-  <section id="uploadBox" class="box hidden">
-    <h2 style="margin-top:0">پست جدید</h2>
-    <input id="file" type="file" accept="image/*,video/*">
-    <textarea id="text" rows="4" placeholder="تجربه‌ات رو بنویس"></textarea>
-    <div class="row">
-      <button id="publishBtn">انتشار</button>
-      <button id="cancelBtn" class="ghost">انصراف</button>
-    </div>
-    <p id="status" style="color:var(--muted)"></p>
-  </section>
-
-  <!-- فید -->
-  <section id="feed"></section>
-</main>
+<nav>
+  <a href="#/posts" data-p="posts"><span class="ic">⌂</span>پست‌ها</a>
+  <a href="#/search" data-p="search"><span class="ic">⌕</span>جستجو</a>
+  <a href="#/new" data-p="new"><span class="ic">＋</span>پست جدید</a>
+  <a href="#/me" data-p="me"><span class="ic">☺</span>صفحه من</a>
+</nav>
 
 <div id="msg"></div>
 
 <script>
-// ============ تنظیمات: این‌ها رو از کنسول Appwrite بردار ============
+// ============ تنظیمات ============
 const CONFIG = {
   endpoint: 'https://fra.cloud.appwrite.io/v1',
   projectId: '6ace411d003d049156b2',
@@ -93,12 +83,13 @@ const CONFIG = {
   maxFileMB: 20,
   maxVideoSeconds: 60,
   maxImageWidth: 1280,
-  imageQuality: 0.75
+  imageQuality: 0.75,
+  keepDays: 7
 };
-// ====================================================================
+// =================================
 
 if (!window.Appwrite) {
-  document.getElementById('feed').innerHTML =
+  document.getElementById('view').innerHTML =
     '<div class="empty">کتابخونه‌ی Appwrite بارگذاری نشد. اینترنت یا فیلترشکن رو چک کن و صفحه رو دوباره باز کن.</div>';
   throw new Error('Appwrite SDK not loaded');
 }
@@ -109,101 +100,230 @@ const databases = new Databases(client);
 const storage = new Storage(client);
 
 const $ = id => document.getElementById(id);
+const view = $('view');
+const KEEP_MS = CONFIG.keepDays * 24 * 3600 * 1000;
 let user = null;
+let prefs = { types: {}, authors: {} };
 
+// ---------- ابزارها ----------
+function h(tag, props, ...kids) {
+  const e = document.createElement(tag);
+  for (const k in (props || {})) {
+    if (k === 'class') e.className = props[k];
+    else if (k.startsWith('on')) e[k] = props[k];
+    else e.setAttribute(k, props[k]);
+  }
+  for (const c of kids.flat()) if (c != null) e.append(c.nodeType ? c : document.createTextNode(c));
+  return e;
+}
 function toast(t) {
   const m = $('msg'); m.textContent = t; m.style.display = 'block';
   clearTimeout(toast.t); toast.t = setTimeout(() => m.style.display = 'none', 4000);
 }
 const fileUrl = id =>
   `${CONFIG.endpoint}/storage/buckets/${CONFIG.bucketId}/files/${id}/view?project=${CONFIG.projectId}`;
-
-function show() {
-  $('authBox').classList.toggle('hidden', !!user);
-  $('newBtn').classList.toggle('hidden', !user);
-  $('logoutBtn').classList.toggle('hidden', !user);
-  if (!user) $('uploadBox').classList.add('hidden');
-}
-
-// ---------- ورود ----------
-async function checkUser() {
-  try { user = await account.get(); } catch { user = null; }
-  show(); loadFeed();
-}
-$('loginBtn').onclick = async () => {
-  try {
-    await account.createEmailPasswordSession($('email').value.trim(), $('pass').value);
-    await checkUser();
-  } catch (e) { toast(e.message || 'ورود انجام نشد'); }
-};
-$('registerBtn').onclick = async () => {
-  try {
-    await account.create(ID.unique(), $('email').value.trim(), $('pass').value);
-    await account.createEmailPasswordSession($('email').value.trim(), $('pass').value);
-    await checkUser();
-  } catch (e) { toast(e.message || 'ثبت‌نام انجام نشد'); }
-};
-$('logoutBtn').onclick = async () => {
-  try { await account.deleteSession('current'); } catch {}
-  user = null; show(); loadFeed();
-};
-
-// ---------- فید ----------
 function timeAgo(iso) {
   const s = (Date.now() - new Date(iso)) / 1000;
   if (s < 3600) return Math.max(1, Math.floor(s / 60)) + ' دقیقه پیش';
   if (s < 86400) return Math.floor(s / 3600) + ' ساعت پیش';
   return Math.floor(s / 86400) + ' روز پیش';
 }
-async function loadFeed() {
-  const feed = $('feed');
-  try {
-    const res = await databases.listDocuments(CONFIG.databaseId, CONFIG.collectionId,
-      [Query.orderDesc('$createdAt'), Query.limit(30)]);
-    feed.innerHTML = '';
-    if (!res.documents.length) {
-      feed.innerHTML = '<div class="empty">هنوز پستی نیست. اولین نفر باش.</div>';
-      return;
-    }
-    for (const d of res.documents) feed.appendChild(card(d));
-  } catch (e) {
-    feed.innerHTML = '<div class="empty">پست‌ها بارگذاری نشد: ' + (e.message || '') + '</div>';
-  }
+const initial = n => (n || '؟').trim().charAt(0).toUpperCase();
+const avatar = (name, big) => h('span', { class: 'avatar' + (big ? ' big' : '') }, initial(name));
+
+// ---------- کاربر ----------
+async function checkUser() {
+  try { user = await account.get(); } catch { user = null; }
+  const p = (user && user.prefs) || {};
+  prefs = { types: p.types || {}, authors: p.authors || {} };
+  $('loginTop').style.display = user ? 'none' : '';
 }
-function card(d) {
-  const el = document.createElement('article'); el.className = 'card';
-  const head = document.createElement('div'); head.className = 'head';
-  const name = document.createElement('strong'); name.textContent = d.userName || 'کاربر';
-  head.appendChild(name);
-  if (user && d.userId === user.$id) {
-    const del = document.createElement('button'); del.className = 'danger'; del.textContent = 'حذف';
-    del.onclick = () => removePost(d);
-    head.appendChild(del);
+$('loginTop').onclick = () => { location.hash = '#/login'; };
+
+let saveT;
+function savePrefs() {
+  if (!user) return;
+  clearTimeout(saveT);
+  saveT = setTimeout(async () => {
+    try {
+      prefs.authors = Object.fromEntries(
+        Object.entries(prefs.authors).sort((a, b) => b[1] - a[1]).slice(0, 40));
+      await account.updatePrefs(prefs);
+    } catch {}
+  }, 4000);
+}
+
+// ---------- پست‌ها ----------
+let allPosts = [], loadedAt = 0;
+async function fetchPosts(force) {
+  if (!force && allPosts.length && Date.now() - loadedAt < 30000) return allPosts;
+  const since = new Date(Date.now() - KEEP_MS).toISOString();
+  let out = [];
+  for (let p = 0; p < 5; p++) {
+    const res = await databases.listDocuments(CONFIG.databaseId, CONFIG.collectionId, [
+      Query.greaterThan('$createdAt', since), Query.orderDesc('$createdAt'),
+      Query.limit(100), Query.offset(p * 100)]);
+    out = out.concat(res.documents);
+    if (res.documents.length < 100) break;
   }
-  el.appendChild(head);
-  const url = fileUrl(d.fileId);
-  let media;
-  if (d.type === 'video') { media = document.createElement('video'); media.controls = true; media.preload = 'metadata'; }
-  else { media = document.createElement('img'); media.loading = 'lazy'; media.alt = ''; }
-  media.src = url; el.appendChild(media);
-  if (d.text) { const p = document.createElement('p'); p.textContent = d.text; el.appendChild(p); }
-  const t = document.createElement('div'); t.className = 'time'; t.textContent = timeAgo(d.$createdAt);
-  el.appendChild(t);
+  allPosts = out; loadedAt = Date.now();
+  return out;
+}
+
+// رتبه‌بندی بر اساس چیزهایی که کاربر بیشتر نگاه می‌کنه
+function rank(list) {
+  const total = Object.values(prefs.types).reduce((a, b) => a + b, 0) || 1;
+  const now = Date.now();
+  return list.map(d => {
+    const age = Math.min(1, (now - new Date(d.$createdAt)) / KEEP_MS);
+    const typeW = (prefs.types[d.type] || 0) / total * 3;
+    const authW = Math.min(prefs.authors[d.userId] || 0, 10) / 10 * 3;
+    const mine = user && d.userId === user.$id ? -1.5 : 0;
+    return { d, s: typeW + authW + 2 * (1 - age) + Math.random() * 0.8 + mine };
+  }).sort((a, b) => b.s - a.s).map(x => x.d);
+}
+
+// ثبت اینکه کاربر چی نگاه کرد
+const seen = new Set();
+function record(id, type, uid, w) {
+  if (!user) return;
+  if (w === 1) { if (seen.has(id)) return; seen.add(id); }
+  prefs.types[type] = (prefs.types[type] || 0) + w;
+  if (uid !== user.$id) prefs.authors[uid] = (prefs.authors[uid] || 0) + w;
+  savePrefs();
+}
+const io = new IntersectionObserver(entries => {
+  for (const e of entries) {
+    const el = e.target;
+    if (e.isIntersecting) el._t = setTimeout(() => record(el.dataset.id, el.dataset.type, el.dataset.uid, 1), 1500);
+    else clearTimeout(el._t);
+  }
+}, { threshold: 0.6 });
+
+function card(d) {
+  const el = h('article', { class: 'card' });
+  el.dataset.id = d.$id; el.dataset.type = d.type; el.dataset.uid = d.userId;
+  const head = h('div', { class: 'head' },
+    h('a', { class: 'who', href: '#/u/' + d.userId }, avatar(d.userName), d.userName || 'کاربر'));
+  if (user && d.userId === user.$id) {
+    head.append(h('button', { class: 'danger', onclick: () => removePost(d) }, 'حذف'));
+  }
+  el.append(head);
+  if (d.type === 'video' && d.fileId && d.fileId !== 'none') {
+    const v = h('video', { controls: '', preload: 'metadata', src: fileUrl(d.fileId) });
+    let played = false;
+    v.onplay = () => { if (!played) { played = true; record(d.$id, 'video', d.userId, 2); } };
+    el.append(v);
+  } else if (d.type === 'image' && d.fileId && d.fileId !== 'none') {
+    el.append(h('img', { src: fileUrl(d.fileId), loading: 'lazy', alt: '' }));
+  }
+  if (d.text) el.append(h('p', { class: d.type === 'text' ? 'only' : '' }, d.text));
+  el.append(h('div', { class: 'time' }, timeAgo(d.$createdAt)));
+  io.observe(el);
   return el;
 }
 async function removePost(d) {
   if (!confirm('این پست حذف بشه؟')) return;
   try {
-    await storage.deleteFile(CONFIG.bucketId, d.fileId);
+    if (d.fileId && d.fileId !== 'none') await storage.deleteFile(CONFIG.bucketId, d.fileId);
     await databases.deleteDocument(CONFIG.databaseId, CONFIG.collectionId, d.$id);
-    loadFeed();
+    loadedAt = 0; route();
   } catch (e) { toast(e.message || 'حذف نشد'); }
 }
+function list(posts, emptyMsg) {
+  const wrap = h('section');
+  if (!posts.length) wrap.append(h('div', { class: 'empty' }, emptyMsg));
+  posts.forEach(p => wrap.append(card(p)));
+  return wrap;
+}
 
-// ---------- آپلود ----------
-$('newBtn').onclick = () => $('uploadBox').classList.remove('hidden');
-$('cancelBtn').onclick = () => { $('uploadBox').classList.add('hidden'); $('status').textContent = ''; };
+// ---------- صفحه‌ها ----------
+async function viewPosts() {
+  view.innerHTML = '<div class="empty">در حال بارگذاری...</div>';
+  try {
+    const posts = rank(await fetchPosts(true));
+    view.innerHTML = '';
+    view.append(h('p', { class: 'muted' }, `پست‌ها بعد از ${CONFIG.keepDays} روز خودکار پاک می‌شن.`));
+    view.append(list(posts, 'هنوز پستی نیست. اولین نفر باش.'));
+  } catch (e) {
+    view.innerHTML = '<div class="empty">پست‌ها بارگذاری نشد: ' + (e.message || '') + '</div>';
+  }
+}
 
+async function viewSearch() {
+  view.innerHTML = '';
+  const input = h('input', { type: 'search', placeholder: 'جستجوی متن پست یا اسم آدم‌ها' });
+  const out = h('div');
+  view.append(input, out);
+  let posts = [];
+  try { posts = await fetchPosts(false); } catch (e) { out.textContent = 'بارگذاری نشد: ' + (e.message || ''); return; }
+  const run = () => {
+    const q = input.value.trim().toLowerCase();
+    out.innerHTML = '';
+    if (!q) { out.append(h('div', { class: 'empty' }, 'یه کلمه یا اسم بنویس')); return; }
+    const people = new Map();
+    posts.forEach(p => { if ((p.userName || '').toLowerCase().includes(q)) people.set(p.userId, p.userName); });
+    if (people.size) {
+      const box = h('div');
+      people.forEach((name, id) => box.append(h('a', { class: 'chip', href: '#/u/' + id }, avatar(name), name)));
+      out.append(box);
+    }
+    const found = posts.filter(p => (p.text || '').toLowerCase().includes(q) || (p.userName || '').toLowerCase().includes(q));
+    out.append(list(found, 'چیزی پیدا نشد'));
+  };
+  input.oninput = run; run(); input.focus();
+}
+
+async function viewProfile(id) {
+  view.innerHTML = '<div class="empty">در حال بارگذاری...</div>';
+  let posts = [];
+  try { posts = (await fetchPosts(true)).filter(p => p.userId === id); }
+  catch (e) { view.innerHTML = '<div class="empty">بارگذاری نشد: ' + (e.message || '') + '</div>'; return; }
+  const own = user && user.$id === id;
+  const name = own ? (user.name || user.email.split('@')[0]) : (posts[0] ? posts[0].userName : 'کاربر');
+  view.innerHTML = '';
+  const box = h('div', { class: 'box' });
+  box.append(h('div', { class: 'profile-head' }, avatar(name, true),
+    h('div', {}, h('h2', {}, name), h('div', { class: 'muted' }, posts.length + ' پست در ' + CONFIG.keepDays + ' روز اخیر'))));
+  if (own) {
+    box.append(h('div', { class: 'row', style: 'margin-top:14px' },
+      h('button', { class: 'ghost', onclick: renameUser }, 'ویرایش اسم'),
+      h('button', { class: 'ghost', onclick: logout }, 'خروج')));
+  }
+  view.append(box, list(posts, own ? 'هنوز پستی نذاشتی.' : 'این کاربر پست فعالی نداره.'));
+}
+async function renameUser() {
+  const n = prompt('اسم جدیدت رو بنویس', user.name || '');
+  if (!n || !n.trim()) return;
+  try { await account.updateName(n.trim()); await checkUser(); route(); toast('اسم عوض شد. پست‌های قدیمی با اسم قبلی می‌مونن.'); }
+  catch (e) { toast(e.message || 'اسم عوض نشد'); }
+}
+async function logout() {
+  try { await account.deleteSession('current'); } catch {}
+  user = null; prefs = { types: {}, authors: {} }; $('loginTop').style.display = '';
+  location.hash = '#/posts'; route();
+}
+
+function viewLogin() {
+  view.innerHTML = '';
+  const name = h('input', { placeholder: 'اسم (فقط برای ثبت‌نام)' });
+  const email = h('input', { type: 'email', placeholder: 'ایمیل', dir: 'ltr' });
+  const pass = h('input', { type: 'password', placeholder: 'رمز عبور (حداقل ۸ کاراکتر)', dir: 'ltr' });
+  const login = async () => {
+    await account.createEmailPasswordSession(email.value.trim(), pass.value);
+    await checkUser(); location.hash = '#/posts'; route();
+  };
+  view.append(h('section', { class: 'box' },
+    h('h2', { style: 'margin-top:0' }, 'ورود یا ثبت‌نام'), name, email, pass,
+    h('div', { class: 'row' },
+      h('button', { onclick: async () => { try { await login(); } catch (e) { toast(e.message || 'ورود انجام نشد'); } } }, 'ورود'),
+      h('button', { class: 'ghost', onclick: async () => {
+        if (!name.value.trim()) return toast('اسمت رو بنویس');
+        try { await account.create(ID.unique(), email.value.trim(), pass.value, name.value.trim()); await login(); }
+        catch (e) { toast(e.message || 'ثبت‌نام انجام نشد'); } } }, 'ثبت‌نام'))));
+}
+
+// ---------- پست جدید ----------
 function compressImage(file) {
   return new Promise((resolve, reject) => {
     const img = new Image();
@@ -228,45 +348,64 @@ function videoDuration(file) {
     v.src = URL.createObjectURL(file);
   });
 }
+function viewNew() {
+  if (!user) { toast('اول وارد شو'); location.hash = '#/login'; return; }
+  view.innerHTML = '';
+  const file = h('input', { type: 'file', accept: 'image/*,video/*' });
+  const text = h('textarea', { rows: '5', maxlength: '2000', placeholder: 'تجربه‌ات رو بنویس (عکس یا ویدیو اختیاریه)' });
+  const status = h('p', { class: 'muted' });
+  const btn = h('button', {}, 'انتشار');
+  btn.onclick = async () => {
+    const f = file.files[0], t = text.value.trim();
+    if (!f && !t) return toast('یه متن بنویس یا عکس/ویدیو انتخاب کن');
+    btn.disabled = true;
+    try {
+      let type = 'text', fileId = 'none';
+      const perms = [Permission.read(Role.any()), Permission.delete(Role.user(user.$id))];
+      if (f) {
+        let upload = f;
+        if (f.type.startsWith('image/')) {
+          type = 'image'; status.textContent = 'در حال فشرده‌سازی عکس...';
+          upload = await compressImage(f);
+        } else if (f.type.startsWith('video/')) {
+          type = 'video';
+          const dur = await videoDuration(f);
+          if (dur > CONFIG.maxVideoSeconds) throw `ویدیو باید حداکثر ${CONFIG.maxVideoSeconds} ثانیه باشه`;
+        } else throw 'فقط عکس یا ویدیو';
+        if (upload.size > CONFIG.maxFileMB * 1024 * 1024) throw `حجم فایل باید کمتر از ${CONFIG.maxFileMB} مگابایت باشه`;
+        status.textContent = 'در حال آپلود...';
+        fileId = (await storage.createFile(CONFIG.bucketId, ID.unique(), upload, perms)).$id;
+      }
+      await databases.createDocument(CONFIG.databaseId, CONFIG.collectionId, ID.unique(), {
+        userId: user.$id,
+        userName: user.name || user.email.split('@')[0],
+        text: t, fileId, type
+      }, perms);
+      loadedAt = 0; toast('منتشر شد'); location.hash = '#/me';
+    } catch (e) {
+      toast(typeof e === 'string' ? e : (e.message || 'آپلود انجام نشد'));
+      status.textContent = '';
+    }
+    btn.disabled = false;
+  };
+  view.append(h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'پست جدید'), file, text, btn, status));
+}
 
-$('publishBtn').onclick = async () => {
-  const f = $('file').files[0];
-  if (!f) return toast('اول یه عکس یا ویدیو انتخاب کن');
-  const btn = $('publishBtn'); btn.disabled = true;
-  try {
-    let type, upload = f;
-    if (f.type.startsWith('image/')) {
-      type = 'image'; $('status').textContent = 'در حال فشرده‌سازی عکس...';
-      upload = await compressImage(f);
-    } else if (f.type.startsWith('video/')) {
-      type = 'video';
-      const dur = await videoDuration(f);
-      if (dur > CONFIG.maxVideoSeconds) throw `ویدیو باید حداکثر ${CONFIG.maxVideoSeconds} ثانیه باشه`;
-    } else throw 'فقط عکس یا ویدیو';
-    if (upload.size > CONFIG.maxFileMB * 1024 * 1024)
-      throw `حجم فایل باید کمتر از ${CONFIG.maxFileMB} مگابایت باشه`;
-
-    $('status').textContent = 'در حال آپلود...';
-    const perms = [Permission.read(Role.any()), Permission.delete(Role.user(user.$id))];
-    const saved = await storage.createFile(CONFIG.bucketId, ID.unique(), upload, perms);
-    await databases.createDocument(CONFIG.databaseId, CONFIG.collectionId, ID.unique(), {
-      userId: user.$id,
-      userName: user.name || user.email.split('@')[0],
-      text: $('text').value.trim(),
-      fileId: saved.$id,
-      type
-    }, perms);
-    $('file').value = ''; $('text').value = ''; $('status').textContent = '';
-    $('uploadBox').classList.add('hidden');
-    toast('منتشر شد'); loadFeed();
-  } catch (e) {
-    toast(typeof e === 'string' ? e : (e.message || 'آپلود انجام نشد'));
-    $('status').textContent = '';
-  }
-  btn.disabled = false;
-};
-
-checkUser();
+// ---------- مسیریابی ----------
+function route() {
+  const parts = (location.hash || '#/posts').split('/');
+  const page = parts[1] || 'posts', arg = parts[2];
+  document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.p === page));
+  window.scrollTo(0, 0);
+  if (page === 'search') viewSearch();
+  else if (page === 'u' && arg) viewProfile(arg);
+  else if (page === 'me') { if (!user) location.hash = '#/login'; else viewProfile(user.$id); }
+  else if (page === 'new') viewNew();
+  else if (page === 'login') viewLogin();
+  else viewPosts();
+}
+window.addEventListener('hashchange', route);
+checkUser().then(route);
 </script>
 </body>
 </html>
