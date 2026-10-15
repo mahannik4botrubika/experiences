@@ -316,25 +316,42 @@ async function logout() {
 
 function viewLogin() {
   view.innerHTML = '';
-  const name = h('input', { placeholder: 'اسم (فقط برای ثبت‌نام)' });
+  const name = h('input', { placeholder: 'اسم (برای بار اول)' });
   const email = h('input', { type: 'email', placeholder: 'ایمیل', dir: 'ltr' });
-  const pass = h('input', { type: 'password', placeholder: 'رمز عبور (حداقل ۸ کاراکتر)', dir: 'ltr' });
-  const login = async () => {
-    await account.createEmailPasswordSession(email.value.trim(), pass.value);
-    await checkUser(); location.hash = '#/posts'; route();
+  const code = h('input', { placeholder: 'کد ۶ رقمی', dir: 'ltr', inputmode: 'numeric', maxlength: '6' });
+  const info = h('p', { class: 'muted' });
+  const sendBtn = h('button', {}, 'ارسال کد به ایمیل');
+  const enterBtn = h('button', {}, 'ورود');
+  let userId = null;
+  const step1 = h('div', {}, name, email, sendBtn);
+  const back = h('button', { class: 'ghost', onclick: () => { step2.style.display = 'none'; step1.style.display = ''; } }, 'تغییر ایمیل');
+  const step2 = h('div', { style: 'display:none' }, info, code, h('div', { class: 'row' }, enterBtn, back));
+
+  sendBtn.onclick = async () => {
+    if (!email.value.trim()) return toast('ایمیلت رو بنویس');
+    sendBtn.disabled = true;
+    try {
+      const t = await account.createEmailToken(ID.unique(), email.value.trim());
+      userId = t.userId;
+      info.textContent = 'یه کد به ' + email.value.trim() + ' فرستادیم. پوشه‌ی اسپم رو هم نگاه کن.';
+      step1.style.display = 'none'; step2.style.display = ''; code.focus();
+    } catch (e) { toast(e.message || 'کد فرستاده نشد'); }
+    sendBtn.disabled = false;
+  };
+  enterBtn.onclick = async () => {
+    enterBtn.disabled = true;
+    try {
+      await account.createSession(userId, code.value.trim());
+      const u = await account.get();
+      if (!u.name && name.value.trim()) await account.updateName(name.value.trim());
+      await checkUser(); location.hash = '#/posts'; route();
+    } catch (e) { toast(e.message || 'کد درست نیست'); }
+    enterBtn.disabled = false;
   };
   view.append(h('section', { class: 'box' },
-    h('h2', { style: 'margin-top:0' }, 'ورود یا ثبت‌نام'), name, email, pass,
-    h('div', { class: 'row' },
-      h('button', { onclick: async () => { try { await login(); } catch (e) { toast(e.message || 'ورود انجام نشد'); } } }, 'ورود'),
-      h('button', { class: 'ghost', onclick: async () => {
-        if (!name.value.trim()) return toast('اسمت رو بنویس');
-        try {
-          await account.create(ID.unique(), email.value.trim(), pass.value, name.value.trim());
-          await login();
-          try { await account.createVerification(location.origin + location.pathname); toast('ایمیل تأیید برات فرستاده شد'); } catch {}
-        }
-        catch (e) { toast(e.message || 'ثبت‌نام انجام نشد'); } } }, 'ثبت‌نام'))));
+    h('h2', { style: 'margin-top:0' }, 'ورود یا ثبت‌نام'),
+    h('p', { class: 'muted' }, 'رمز لازم نیست. یه کد به ایمیلت می‌فرستیم و با همون وارد می‌شی. تا کد رو وارد نکنی وارد برنامه نمی‌شی.'),
+    step1, step2));
 }
 
 // ---------- تأیید ایمیل ----------
@@ -475,6 +492,16 @@ async function viewChat() {
 
 // ---------- مسیریابی ----------
 function route() {
+  const navEl = document.querySelector('nav');
+  if (user && !user.emailVerification) {
+    // تا ایمیل تأیید نشده، هیچ بخشی از برنامه باز نمی‌شه
+    navEl.style.display = 'none';
+    clearInterval(chatTimer);
+    view.innerHTML = '';
+    view.append(verifyNotice(), h('button', { class: 'ghost', onclick: logout }, 'خروج'));
+    return;
+  }
+  navEl.style.display = '';
   const parts = (location.hash || '#/posts').split('/');
   const page = parts[1] || 'posts', arg = parts[2];
   document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.p === page));
