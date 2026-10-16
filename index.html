@@ -8,65 +8,70 @@
 <script>window.Appwrite||document.write('<script src="https://unpkg.com/appwrite@16.0.0"><\/script>')</script>
 <script>window.Appwrite||document.write('<script src="https://gcore.jsdelivr.net/npm/appwrite@16.0.0"><\/script>')</script>
 <style>
-  :root {
-    --bg: #f6f3ee; --card: #ffffff; --ink: #1d2a2a; --muted: #6b7777;
-    --accent: #1f6f6b; --accent-ink: #ffffff; --line: #e3ded5; --danger: #b3412f;
-  }
+  :root { --bg:#f6f3ee; --card:#ffffff; --ink:#1d2a2a; --muted:#6b7777; --accent:#1f6f6b; --accent-ink:#ffffff; --line:#e3ded5; --danger:#b3412f; }
+  :root[data-theme="dark"] { --bg:#14181a; --card:#1d2326; --ink:#e8eeee; --muted:#9aa8a8; --accent:#3fb6ad; --accent-ink:#0b1414; --line:#2c3538; --danger:#e07a67; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--ink);
-    font-family: Tahoma, "Segoe UI", system-ui, sans-serif; line-height: 1.7; padding-bottom: 76px; }
-  header { padding: 12px 16px; background: var(--card); border-bottom: 1px solid var(--line);
-    position: sticky; top: 0; z-index: 5; display: flex; justify-content: space-between; align-items: center; }
-  header h1 { font-size: 20px; margin: 0; }
-  main { max-width: 560px; margin: 0 auto; padding: 16px; }
-  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; margin-bottom: 16px; overflow: hidden; }
-  .card .head { display: flex; justify-content: space-between; align-items: center; padding: 10px 14px; }
-  .who { display: flex; align-items: center; gap: 10px; color: inherit; text-decoration: none; font-weight: bold; }
-  .avatar { width: 36px; height: 36px; border-radius: 50%; background: var(--accent); color: #fff;
-    display: inline-flex; align-items: center; justify-content: center; font-weight: bold; flex: none; }
-  .avatar.big { width: 72px; height: 72px; font-size: 30px; }
-  .card img, .card video { width: 100%; display: block; background: #000; max-height: 80vh; object-fit: contain; }
-  .card p { margin: 0; padding: 12px 14px; white-space: pre-wrap; word-break: break-word; }
-  .card p.only { font-size: 18px; padding: 22px 16px; }
-  .card .time { font-size: 12px; color: var(--muted); padding: 0 14px 12px; }
-  input, textarea { width: 100%; padding: 10px 12px; border: 1px solid var(--line);
-    border-radius: 8px; font: inherit; margin-bottom: 10px; background: #fff; }
-  button { font: inherit; cursor: pointer; border: 1px solid var(--accent); background: var(--accent);
-    color: var(--accent-ink); padding: 9px 16px; border-radius: 8px; }
-  button.ghost { background: transparent; color: var(--accent); }
-  button.danger { background: transparent; color: var(--danger); border-color: var(--danger); padding: 4px 10px; font-size: 13px; }
-  button:disabled { opacity: .5; cursor: default; }
-  button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline: 3px solid #f0b429; outline-offset: 2px; }
-  .box { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px; margin-bottom: 16px; }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
-  .profile-head { display: flex; gap: 16px; align-items: center; }
-  .profile-head h2 { margin: 0; }
-  .muted { color: var(--muted); font-size: 14px; }
-  .chip { display: inline-flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--line);
-    border-radius: 999px; padding: 4px 12px 4px 6px; margin: 0 0 8px 8px; text-decoration: none; color: inherit; }
-  nav { position: fixed; bottom: 0; right: 0; left: 0; background: var(--card); border-top: 1px solid var(--line);
-    display: flex; justify-content: space-around; padding: 8px 0 calc(8px + env(safe-area-inset-bottom, 0px)); z-index: 6; }
-  nav a { flex: 1; text-align: center; text-decoration: none; color: var(--muted); font-size: 13px; padding: 4px 0; }
-  nav a.on { color: var(--accent); font-weight: bold; }
-  nav a .ic { display: block; font-size: 20px; line-height: 1.2; }
-  #msg { position: fixed; bottom: 84px; right: 16px; left: 16px; max-width: 520px; margin: 0 auto;
-    background: var(--ink); color: #fff; padding: 12px 16px; border-radius: 8px; display: none; z-index: 10; }
-  .empty { text-align: center; color: var(--muted); padding: 40px 0; }
-  .bubbles { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-  .b { max-width: 85%; padding: 8px 12px; border-radius: 14px; background: var(--card);
-    border: 1px solid var(--line); word-break: break-word; white-space: pre-wrap; align-self: flex-end; }
-  .b.me { align-self: flex-start; background: var(--accent); color: #fff; border-color: var(--accent); }
-  .bn { font-size: 12px; font-weight: bold; color: var(--accent); text-decoration: none; display: block; }
-  .b.me .bn { color: #fff; }
-  .bt { font-size: 11px; opacity: .7; }
-  .sendbar { display: flex; gap: 8px; position: sticky; bottom: 72px; background: var(--bg); padding: 8px 0; }
+  body { margin:0; background:var(--bg); color:var(--ink); font-family:Tahoma,"Segoe UI",system-ui,sans-serif; line-height:1.7; padding-bottom:76px; }
+  header { padding:12px 16px; background:var(--card); border-bottom:1px solid var(--line); position:sticky; top:0; z-index:5; display:flex; justify-content:space-between; align-items:center; }
+  header h1 { font-size:20px; margin:0; }
+  main { max-width:560px; margin:0 auto; padding:16px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:14px; margin-bottom:16px; overflow:hidden; }
+  .card .head { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; gap:8px; }
+  .who { display:flex; align-items:center; gap:10px; color:inherit; text-decoration:none; font-weight:bold; }
+  .avatar { width:36px; height:36px; border-radius:50%; background:var(--accent); color:var(--accent-ink); display:inline-flex; align-items:center; justify-content:center; font-weight:bold; flex:none; object-fit:cover; }
+  .avatar.big { width:72px; height:72px; font-size:30px; }
+  .card img.media, .card video { width:100%; display:block; background:#000; max-height:80vh; object-fit:contain; }
+  .card p { margin:0; padding:12px 14px; white-space:pre-wrap; word-break:break-word; }
+  .card p.only { font-size:18px; padding:22px 16px; }
+  .card .time { font-size:12px; color:var(--muted); padding:0 14px 8px; }
+  input, textarea { width:100%; padding:10px 12px; border:1px solid var(--line); border-radius:10px; font:inherit; margin-bottom:10px; background:var(--card); color:var(--ink); }
+  button { font:inherit; cursor:pointer; border:1px solid var(--accent); background:var(--accent); color:var(--accent-ink); padding:9px 16px; border-radius:10px; }
+  button.ghost { background:transparent; color:var(--accent); }
+  button.danger { background:transparent; color:var(--danger); border-color:var(--danger); padding:4px 10px; font-size:13px; }
+  button.small { padding:4px 10px; font-size:13px; }
+  button:disabled { opacity:.5; cursor:default; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible, a:focus-visible { outline:3px solid #f0b429; outline-offset:2px; }
+  .box { background:var(--card); border:1px solid var(--line); border-radius:14px; padding:18px; margin-bottom:16px; }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+  .profile-head { display:flex; gap:16px; align-items:center; }
+  .profile-head h2 { margin:0; }
+  .muted { color:var(--muted); font-size:14px; }
+  .chip { display:inline-flex; align-items:center; gap:8px; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:4px 12px 4px 6px; margin:0 0 8px 8px; text-decoration:none; color:inherit; }
+  .links a { display:inline-block; margin:0 0 6px 8px; color:var(--accent); }
+  .tabs { display:flex; gap:8px; margin-bottom:12px; }
+  .tab { flex:1; background:transparent; color:var(--muted); border:1px solid var(--line); }
+  .tab.on { background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .bar { display:flex; gap:6px; padding:0 10px 10px; flex-wrap:wrap; }
+  .act { background:transparent; color:var(--ink); border:1px solid var(--line); padding:4px 10px; font-size:14px; }
+  .act.on { color:var(--danger); border-color:var(--danger); }
+  .cbox { border-top:1px solid var(--line); padding:10px 14px; }
+  .cm { margin-bottom:8px; }
+  .cm.rep { margin-right:22px; }
+  .cm .t { white-space:pre-wrap; word-break:break-word; }
+  .cm .meta { font-size:12px; color:var(--muted); }
+  nav { position:fixed; bottom:0; right:0; left:0; background:var(--card); border-top:1px solid var(--line); display:flex; justify-content:space-around; padding:8px 0 calc(8px + env(safe-area-inset-bottom,0px)); z-index:6; }
+  nav a { flex:1; text-align:center; text-decoration:none; color:var(--muted); font-size:13px; padding:4px 0; }
+  nav a.on { color:var(--accent); font-weight:bold; }
+  nav a .ic { display:block; font-size:20px; line-height:1.2; }
+  #msg { position:fixed; bottom:84px; right:16px; left:16px; max-width:520px; margin:0 auto; background:var(--ink); color:var(--bg); padding:12px 16px; border-radius:10px; display:none; z-index:10; }
+  .empty { text-align:center; color:var(--muted); padding:40px 0; }
+  .bubbles { display:flex; flex-direction:column; gap:8px; margin-bottom:12px; }
+  .b { max-width:85%; padding:8px 12px; border-radius:16px; background:var(--card); border:1px solid var(--line); word-break:break-word; white-space:pre-wrap; align-self:flex-end; }
+  .b.me { align-self:flex-start; background:var(--accent); color:var(--accent-ink); border-color:var(--accent); }
+  .bn { font-size:12px; font-weight:bold; color:var(--accent); text-decoration:none; display:block; }
+  .b.me .bn { color:var(--accent-ink); }
+  .bt { font-size:11px; opacity:.7; }
+  .sendbar { display:flex; gap:8px; position:sticky; bottom:72px; background:var(--bg); padding:8px 0; }
 </style>
 </head>
 <body>
 
 <header>
   <h1>تجربه‌ها</h1>
-  <button id="loginTop" class="ghost" style="display:none">ورود / ثبت‌نام</button>
+  <div class="row">
+    <button id="themeBtn" class="ghost small" aria-label="حالت تاریک">🌙</button>
+    <button id="loginTop" class="ghost small" style="display:none">ورود / ثبت‌نام</button>
+  </div>
 </header>
 
 <main id="view"></main>
@@ -90,17 +95,13 @@ const CONFIG = {
   collectionId: '6acf990e0020720c9550',
   bucketId: '6acf9c8b003cff99b09a',
   messagesId: '6ad0beeb0037f9256400',
-  maxFileMB: 20,
-  maxVideoSeconds: 60,
-  maxImageWidth: 1280,
-  imageQuality: 0.75,
-  keepDays: 7
+  actionsId: '6ad1b34a000658debecf',
+  maxFileMB: 20, maxVideoSeconds: 60, maxImageWidth: 1280, imageQuality: 0.75, keepDays: 7
 };
 // =================================
 
 if (!window.Appwrite) {
-  document.getElementById('view').innerHTML =
-    '<div class="empty">کتابخونه‌ی Appwrite بارگذاری نشد. اینترنت یا فیلترشکن رو چک کن و صفحه رو دوباره باز کن.</div>';
+  document.getElementById('view').innerHTML = '<div class="empty">کتابخونه‌ی Appwrite بارگذاری نشد. اینترنت یا فیلترشکن رو چک کن و صفحه رو دوباره باز کن.</div>';
   throw new Error('Appwrite SDK not loaded');
 }
 const { Client, Account, Databases, Storage, ID, Query, Permission, Role } = Appwrite;
@@ -108,6 +109,7 @@ const client = new Client().setEndpoint(CONFIG.endpoint).setProject(CONFIG.proje
 const account = new Account(client);
 const databases = new Databases(client);
 const storage = new Storage(client);
+const DB = CONFIG.databaseId, POSTS = CONFIG.collectionId, MSG = CONFIG.messagesId;
 
 const $ = id => document.getElementById(id);
 const view = $('view');
@@ -123,23 +125,42 @@ function h(tag, props, ...kids) {
     else if (k.startsWith('on')) e[k] = props[k];
     else e.setAttribute(k, props[k]);
   }
-  for (const c of kids.flat()) if (c != null) e.append(c.nodeType ? c : document.createTextNode(c));
+  for (const c of kids.flat()) if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c));
   return e;
 }
 function toast(t) {
   const m = $('msg'); m.textContent = t; m.style.display = 'block';
   clearTimeout(toast.t); toast.t = setTimeout(() => m.style.display = 'none', 4000);
 }
-const fileUrl = id =>
-  `${CONFIG.endpoint}/storage/buckets/${CONFIG.bucketId}/files/${id}/view?project=${CONFIG.projectId}`;
+const fileUrl = id => `${CONFIG.endpoint}/storage/buckets/${CONFIG.bucketId}/files/${id}/view?project=${CONFIG.projectId}`;
 function timeAgo(iso) {
   const s = (Date.now() - new Date(iso)) / 1000;
   if (s < 3600) return Math.max(1, Math.floor(s / 60)) + ' دقیقه پیش';
   if (s < 86400) return Math.floor(s / 3600) + ' ساعت پیش';
   return Math.floor(s / 86400) + ' روز پیش';
 }
-const initial = n => (n || '؟').trim().charAt(0).toUpperCase();
-const avatar = (name, big) => h('span', { class: 'avatar' + (big ? ' big' : '') }, initial(name));
+const me = () => user ? (user.name || user.email.split('@')[0]) : '';
+const own = id => user && user.$id === id;
+async function hid(prefix, str) {
+  const b = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+  return prefix + [...new Uint8Array(b)].slice(0, 16).map(x => x.toString(16).padStart(2, '0')).join('');
+}
+const pubPerms = () => [Permission.read(Role.any()), Permission.delete(Role.user(user.$id))];
+const privPerms = () => [Permission.read(Role.user(user.$id)), Permission.delete(Role.user(user.$id))];
+const actionsReady = () => CONFIG.actionsId && !CONFIG.actionsId.startsWith('YOUR');
+
+// ---------- حالت تاریک ----------
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  $('themeBtn').textContent = t === 'dark' ? '☀️' : '🌙';
+}
+let theme = 'light';
+try { theme = localStorage.getItem('theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'); } catch {}
+applyTheme(theme);
+$('themeBtn').onclick = () => {
+  theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(theme);
+  try { localStorage.setItem('theme', theme); } catch {}
+};
 
 // ---------- کاربر ----------
 async function checkUser() {
@@ -149,18 +170,123 @@ async function checkUser() {
   $('loginTop').style.display = user ? 'none' : '';
 }
 $('loginTop').onclick = () => { location.hash = '#/login'; };
-
 let saveT;
 function savePrefs() {
   if (!user) return;
   clearTimeout(saveT);
   saveT = setTimeout(async () => {
     try {
-      prefs.authors = Object.fromEntries(
-        Object.entries(prefs.authors).sort((a, b) => b[1] - a[1]).slice(0, 40));
+      prefs.authors = Object.fromEntries(Object.entries(prefs.authors).sort((a, b) => b[1] - a[1]).slice(0, 40));
       await account.updatePrefs(prefs);
     } catch {}
   }, 4000);
+}
+
+// ---------- داده‌ی تعامل‌ها (لایک، کامنت، فالو، پروفایل...) ----------
+let A = { rows: [], loaded: 0 };
+function addTo(map, key, val) { if (!map.has(key)) map.set(key, new Set()); map.get(key).add(val); }
+function indexActions() {
+  A.likes = new Map(); A.comments = new Map(); A.followers = new Map(); A.following = new Map();
+  A.names = new Map(); A.profiles = new Map(); A.mySaves = []; A.blocked = new Set();
+  for (const r of A.rows) {
+    if (r.kind === 'like') addTo(A.likes, r.targetId, r.userId);
+    else if (r.kind === 'comment') { if (!A.comments.has(r.targetId)) A.comments.set(r.targetId, []); A.comments.get(r.targetId).push(r); }
+    else if (r.kind === 'follow') { addTo(A.followers, r.targetId, r.userId); addTo(A.following, r.userId, r.targetId); }
+    else if (r.kind === 'name') { if (!A.names.has(r.userId)) A.names.set(r.userId, r.userName); }
+    else if (r.kind === 'profile') { try { A.profiles.set(r.userId, JSON.parse(r.data || '{}')); } catch { A.profiles.set(r.userId, {}); } }
+    else if (user && r.userId === user.$id && r.kind === 'save') A.mySaves.push(r);
+    else if (user && r.userId === user.$id && r.kind === 'block') A.blocked.add(r.targetId);
+  }
+  for (const list of A.comments.values()) list.sort((a, b) => new Date(a.$createdAt) - new Date(b.$createdAt));
+}
+indexActions();
+async function fetchActions(force) {
+  if (!actionsReady()) return;
+  if (!force && A.loaded && Date.now() - A.loaded < 20000) return;
+  let out = [];
+  for (let p = 0; p < 10; p++) {
+    const res = await databases.listDocuments(DB, CONFIG.actionsId, [Query.orderDesc('$createdAt'), Query.limit(100), Query.offset(p * 100)]);
+    out = out.concat(res.documents);
+    if (res.documents.length < 100) break;
+  }
+  A.rows = out; A.loaded = Date.now(); indexActions();
+}
+function addRow(doc) { A.rows.unshift(doc); indexActions(); }
+function removeRow(id) { A.rows = A.rows.filter(r => r.$id !== id); indexActions(); }
+async function act(create, fn) {
+  if (!user) { toast('اول وارد شو'); return false; }
+  if (!actionsReady()) { toast('این بخش هنوز تنظیم نشده'); return false; }
+  try { await fn(); return true; } catch (e) { toast(e.message || 'انجام نشد'); return false; }
+}
+const nameOf = (uid, fallback) => A.names.get(uid) || fallback || 'کاربر';
+function avatar(uid, name, big) {
+  const p = A.profiles.get(uid);
+  if (p && p.avatar) return h('img', { class: 'avatar' + (big ? ' big' : ''), src: fileUrl(p.avatar), alt: '' });
+  return h('span', { class: 'avatar' + (big ? ' big' : '') }, (name || '؟').trim().charAt(0).toUpperCase());
+}
+
+// ---------- لایک، ذخیره، فالو، بلاک، ریپورت ----------
+async function toggleLike(d) {
+  const set = A.likes.get(d.$id) || new Set();
+  await act(0, async () => {
+    const id = await hid('l', user.$id + d.$id);
+    if (set.has(user.$id)) { await databases.deleteDocument(DB, CONFIG.actionsId, id); removeRow(id); }
+    else addRow(await databases.createDocument(DB, CONFIG.actionsId, id, { kind: 'like', userId: user.$id, userName: me(), targetId: d.$id }, pubPerms()));
+  });
+}
+async function toggleFollow(uid) {
+  const set = A.following.get(user ? user.$id : '') || new Set();
+  return act(0, async () => {
+    const id = await hid('f', user.$id + uid);
+    if (set.has(uid)) { await databases.deleteDocument(DB, CONFIG.actionsId, id); removeRow(id); }
+    else addRow(await databases.createDocument(DB, CONFIG.actionsId, id, { kind: 'follow', userId: user.$id, userName: me(), targetId: uid }, pubPerms()));
+  });
+}
+async function toggleBlock(uid) {
+  return act(0, async () => {
+    const id = await hid('b', user.$id + uid);
+    if (A.blocked.has(uid)) { await databases.deleteDocument(DB, CONFIG.actionsId, id); removeRow(id); }
+    else {
+      if (!confirm('این کاربر بلاک بشه؟ پست‌هاش رو نمی‌بینی.')) return;
+      addRow(await databases.createDocument(DB, CONFIG.actionsId, id, { kind: 'block', userId: user.$id, targetId: uid }, privPerms()));
+    }
+  });
+}
+async function savePost(d) {
+  const mine = A.mySaves.filter(r => r.targetId === d.$id);
+  await act(0, async () => {
+    if (mine.length) {
+      if (!confirm('از لیست‌های ذخیره حذف بشه؟')) return;
+      for (const r of mine) { await databases.deleteDocument(DB, CONFIG.actionsId, r.$id); removeRow(r.$id); }
+    } else {
+      const list = (prompt('اسم لیست (خالی بذاری می‌ره تو «save»)', 'save') || '').trim() || 'save';
+      const id = await hid('s', user.$id + d.$id + list);
+      addRow(await databases.createDocument(DB, CONFIG.actionsId, id, { kind: 'save', userId: user.$id, targetId: d.$id, text: list.slice(0, 60) }, privPerms()));
+    }
+  });
+}
+async function reportPost(d) {
+  const reason = prompt('دلیل گزارش چیه؟');
+  if (!reason || !reason.trim()) return;
+  const ok = await act(0, async () => {
+    await databases.createDocument(DB, CONFIG.actionsId, ID.unique(),
+      { kind: 'report', userId: user.$id, userName: me(), targetId: d.$id, text: (reason.trim() + ' | نویسنده: ' + d.userId).slice(0, 1000) }, privPerms());
+  });
+  if (ok) toast('گزارش ثبت شد');
+}
+async function addComment(d, text, parentId) {
+  return act(0, async () => {
+    const data = { kind: 'comment', userId: user.$id, userName: me(), targetId: d.$id, text: text.slice(0, 1000) };
+    if (parentId) data.parentId = parentId;
+    addRow(await databases.createDocument(DB, CONFIG.actionsId, ID.unique(), data, pubPerms()));
+  });
+}
+async function deleteComment(c) {
+  if (!confirm('کامنت حذف بشه؟')) return false;
+  return act(0, async () => {
+    await databases.deleteDocument(DB, CONFIG.actionsId, c.$id); removeRow(c.$id);
+    for (const r of A.rows.filter(r => r.parentId === c.$id)) { try { await databases.deleteDocument(DB, CONFIG.actionsId, r.$id); } catch {} removeRow(r.$id); }
+  });
 }
 
 // ---------- پست‌ها ----------
@@ -170,17 +296,14 @@ async function fetchPosts(force) {
   const since = new Date(Date.now() - KEEP_MS).toISOString();
   let out = [];
   for (let p = 0; p < 5; p++) {
-    const res = await databases.listDocuments(CONFIG.databaseId, CONFIG.collectionId, [
-      Query.greaterThan('$createdAt', since), Query.orderDesc('$createdAt'),
-      Query.limit(100), Query.offset(p * 100)]);
+    const res = await databases.listDocuments(DB, POSTS, [Query.greaterThan('$createdAt', since), Query.orderDesc('$createdAt'), Query.limit(100), Query.offset(p * 100)]);
     out = out.concat(res.documents);
     if (res.documents.length < 100) break;
   }
   allPosts = out; loadedAt = Date.now();
   return out;
 }
-
-// رتبه‌بندی بر اساس چیزهایی که کاربر بیشتر نگاه می‌کنه
+const visible = list => list.filter(p => !A.blocked.has(p.userId));
 function rank(list) {
   const total = Object.values(prefs.types).reduce((a, b) => a + b, 0) || 1;
   const now = Date.now();
@@ -188,12 +311,11 @@ function rank(list) {
     const age = Math.min(1, (now - new Date(d.$createdAt)) / KEEP_MS);
     const typeW = (prefs.types[d.type] || 0) / total * 3;
     const authW = Math.min(prefs.authors[d.userId] || 0, 10) / 10 * 3;
-    const mine = user && d.userId === user.$id ? -1.5 : 0;
-    return { d, s: typeW + authW + 2 * (1 - age) + Math.random() * 0.8 + mine };
+    const likeW = Math.min((A.likes.get(d.$id) || new Set()).size, 10) / 10;
+    const mine = own(d.userId) ? -1.5 : 0;
+    return { d, s: typeW + authW + likeW + 2 * (1 - age) + Math.random() * 0.8 + mine };
   }).sort((a, b) => b.s - a.s).map(x => x.d);
 }
-
-// ثبت اینکه کاربر چی نگاه کرد
 const seen = new Set();
 function record(id, type, uid, w) {
   if (!user) return;
@@ -213,10 +335,15 @@ const io = new IntersectionObserver(entries => {
 function card(d) {
   const el = h('article', { class: 'card' });
   el.dataset.id = d.$id; el.dataset.type = d.type; el.dataset.uid = d.userId;
-  const head = h('div', { class: 'head' },
-    h('a', { class: 'who', href: '#/u/' + d.userId }, avatar(d.userName), d.userName || 'کاربر'));
-  if (user && d.userId === user.$id) {
-    head.append(h('button', { class: 'danger', onclick: () => removePost(d) }, 'حذف'));
+  const nm = nameOf(d.userId, d.userName);
+  const head = h('div', { class: 'head' }, h('a', { class: 'who', href: '#/u/' + d.userId }, avatar(d.userId, nm), nm));
+  if (own(d.userId)) {
+    const tools = h('div', { class: 'row' });
+    if ((d.$permissions || []).some(p => p.startsWith('update('))) {
+      tools.append(h('button', { class: 'ghost small', onclick: () => editPost(d) }, 'ویرایش'));
+    }
+    tools.append(h('button', { class: 'danger', onclick: () => removePost(d) }, 'حذف'));
+    head.append(tools);
   }
   el.append(head);
   if (d.type === 'video' && d.fileId && d.fileId !== 'none') {
@@ -225,10 +352,50 @@ function card(d) {
     v.onplay = () => { if (!played) { played = true; record(d.$id, 'video', d.userId, 2); } };
     el.append(v);
   } else if (d.type === 'image' && d.fileId && d.fileId !== 'none') {
-    el.append(h('img', { src: fileUrl(d.fileId), loading: 'lazy', alt: '' }));
+    el.append(h('img', { class: 'media', src: fileUrl(d.fileId), loading: 'lazy', alt: '' }));
   }
   if (d.text) el.append(h('p', { class: d.type === 'text' ? 'only' : '' }, d.text));
   el.append(h('div', { class: 'time' }, timeAgo(d.$createdAt)));
+
+  const bar = h('div', { class: 'bar' });
+  const cbox = h('div', { class: 'cbox', style: 'display:none' });
+  let replyTo = null;
+  const drawBar = () => {
+    const likes = A.likes.get(d.$id) || new Set();
+    const liked = user && likes.has(user.$id);
+    const saved = user && A.mySaves.some(r => r.targetId === d.$id);
+    bar.innerHTML = '';
+    bar.append(
+      h('button', { class: 'act' + (liked ? ' on' : ''), onclick: async () => { await toggleLike(d); drawBar(); } }, (liked ? '♥ ' : '♡ ') + likes.size),
+      h('button', { class: 'act', onclick: () => { cbox.style.display = cbox.style.display === 'none' ? '' : 'none'; drawComments(); } }, '💬 ' + (A.comments.get(d.$id) || []).length),
+      h('button', { class: 'act', onclick: async () => { await savePost(d); drawBar(); } }, saved ? '🔖 ذخیره شده' : '🔖 ذخیره'),
+      h('button', { class: 'act', onclick: () => reportPost(d), 'aria-label': 'گزارش' }, '⚑'));
+  };
+  const drawComments = () => {
+    if (cbox.style.display === 'none') return;
+    cbox.innerHTML = '';
+    const all = A.comments.get(d.$id) || [];
+    const tops = all.filter(c => !c.parentId);
+    const line = (c, rep) => h('div', { class: 'cm' + (rep ? ' rep' : '') },
+      h('div', { class: 'meta' }, h('a', { href: '#/u/' + c.userId }, nameOf(c.userId, c.userName)), ' · ' + timeAgo(c.$createdAt)),
+      h('div', { class: 't' }, c.text),
+      h('div', { class: 'row' },
+        !rep && h('button', { class: 'ghost small', onclick: () => { replyTo = c; input.placeholder = 'پاسخ به ' + nameOf(c.userId, c.userName) + '...'; input.focus(); } }, 'پاسخ'),
+        own(c.userId) && h('button', { class: 'danger', onclick: async () => { if (await deleteComment(c)) { drawBar(); drawComments(); } } }, 'حذف')));
+    if (!tops.length) cbox.append(h('div', { class: 'muted' }, 'هنوز کامنتی نیست.'));
+    tops.forEach(c => { cbox.append(line(c, false)); all.filter(r => r.parentId === c.$id).forEach(r => cbox.append(line(r, true))); });
+    const input = h('input', { placeholder: 'کامنت بنویس...', maxlength: '1000' });
+    const send = h('button', { class: 'small' }, 'ارسال');
+    send.onclick = async () => {
+      const t = input.value.trim(); if (!t) return;
+      send.disabled = true;
+      if (await addComment(d, t, replyTo ? replyTo.$id : null)) { replyTo = null; drawBar(); drawComments(); }
+      send.disabled = false;
+    };
+    cbox.append(h('div', { class: 'row' }, input, send));
+  };
+  drawBar();
+  el.append(bar, cbox);
   io.observe(el);
   return el;
 }
@@ -236,9 +403,15 @@ async function removePost(d) {
   if (!confirm('این پست حذف بشه؟')) return;
   try {
     if (d.fileId && d.fileId !== 'none') await storage.deleteFile(CONFIG.bucketId, d.fileId);
-    await databases.deleteDocument(CONFIG.databaseId, CONFIG.collectionId, d.$id);
+    await databases.deleteDocument(DB, POSTS, d.$id);
     loadedAt = 0; route();
   } catch (e) { toast(e.message || 'حذف نشد'); }
+}
+async function editPost(d) {
+  const t = prompt('متن جدید پست', d.text || '');
+  if (t === null) return;
+  try { await databases.updateDocument(DB, POSTS, d.$id, { text: t.trim().slice(0, 2000) }); loadedAt = 0; route(); }
+  catch (e) { toast(e.message || 'ویرایش نشد'); }
 }
 function list(posts, emptyMsg) {
   const wrap = h('section');
@@ -248,85 +421,192 @@ function list(posts, emptyMsg) {
 }
 
 // ---------- صفحه‌ها ----------
+let feedTab = 'for';
 async function viewPosts() {
   view.innerHTML = '<div class="empty">در حال بارگذاری...</div>';
   try {
-    const posts = rank(await fetchPosts(true));
+    const [posts] = await Promise.all([fetchPosts(true), fetchActions(true).catch(() => {})]);
     view.innerHTML = '';
+    const tab = (label, key) => h('button', { class: 'tab' + (feedTab === key ? ' on' : ''), onclick: () => { feedTab = key; viewPosts(); } }, label);
+    view.append(h('div', { class: 'tabs' }, tab('برای تو', 'for'), tab('دنبال‌شونده‌ها', 'following')));
     view.append(h('p', { class: 'muted' }, `پست‌ها بعد از ${CONFIG.keepDays} روز خودکار پاک می‌شن.`));
-    view.append(list(posts, 'هنوز پستی نیست. اولین نفر باش.'));
-  } catch (e) {
-    view.innerHTML = '<div class="empty">پست‌ها بارگذاری نشد: ' + (e.message || '') + '</div>';
-  }
+    let shown = visible(posts);
+    if (feedTab === 'following') {
+      const f = A.following.get(user ? user.$id : '') || new Set();
+      view.append(list(shown.filter(p => f.has(p.userId)), user ? 'هنوز کسی رو دنبال نکردی، یا دنبال‌شونده‌هات پستی نذاشتن.' : 'برای دیدن این بخش وارد شو.'));
+    } else view.append(list(rank(shown), 'هنوز پستی نیست. اولین نفر باش.'));
+  } catch (e) { view.innerHTML = '<div class="empty">پست‌ها بارگذاری نشد: ' + (e.message || '') + '</div>'; }
 }
 
 async function viewSearch() {
   view.innerHTML = '';
-  const input = h('input', { type: 'search', placeholder: 'جستجوی متن پست یا اسم آدم‌ها' });
+  const input = h('input', { type: 'search', placeholder: 'جستجوی متن، هشتگ یا اسم آدم‌ها' });
   const out = h('div');
   view.append(input, out);
   let posts = [];
-  try { posts = await fetchPosts(false); } catch (e) { out.textContent = 'بارگذاری نشد: ' + (e.message || ''); return; }
+  try { [posts] = await Promise.all([fetchPosts(false), fetchActions(false).catch(() => {})]); posts = visible(posts); }
+  catch (e) { out.textContent = 'بارگذاری نشد: ' + (e.message || ''); return; }
   const run = () => {
     const q = input.value.trim().toLowerCase();
     out.innerHTML = '';
-    if (!q) { out.append(h('div', { class: 'empty' }, 'یه کلمه یا اسم بنویس')); return; }
+    if (!q) { out.append(h('div', { class: 'empty' }, 'یه کلمه، هشتگ (مثل #سفر) یا اسم بنویس')); return; }
     const people = new Map();
-    posts.forEach(p => { if ((p.userName || '').toLowerCase().includes(q)) people.set(p.userId, p.userName); });
+    A.names.forEach((n, id) => { if (n.toLowerCase().includes(q)) people.set(id, n); });
+    posts.forEach(p => { const n = nameOf(p.userId, p.userName); if (n.toLowerCase().includes(q)) people.set(p.userId, n); });
     if (people.size) {
       const box = h('div');
-      people.forEach((name, id) => box.append(h('a', { class: 'chip', href: '#/u/' + id }, avatar(name), name)));
+      people.forEach((name, id) => box.append(h('a', { class: 'chip', href: '#/u/' + id }, avatar(id, name), name)));
       out.append(box);
     }
-    const found = posts.filter(p => (p.text || '').toLowerCase().includes(q) || (p.userName || '').toLowerCase().includes(q));
-    out.append(list(found, 'چیزی پیدا نشد'));
+    out.append(list(posts.filter(p => (p.text || '').toLowerCase().includes(q)), 'چیزی پیدا نشد'));
   };
   input.oninput = run; run(); input.focus();
 }
 
+let profTab = 'posts';
 async function viewProfile(id) {
   view.innerHTML = '<div class="empty">در حال بارگذاری...</div>';
   let posts = [];
-  try { posts = (await fetchPosts(true)).filter(p => p.userId === id); }
+  try { [posts] = await Promise.all([fetchPosts(true), fetchActions(true).catch(() => {})]); }
   catch (e) { view.innerHTML = '<div class="empty">بارگذاری نشد: ' + (e.message || '') + '</div>'; return; }
-  const own = user && user.$id === id;
-  const name = own ? (user.name || user.email.split('@')[0]) : (posts[0] ? posts[0].userName : 'کاربر');
+  const mine = own(id);
+  const userPosts = posts.filter(p => p.userId === id);
+  const name = mine ? me() : nameOf(id, userPosts[0] ? userPosts[0].userName : null);
+  const prof = A.profiles.get(id) || {};
+  const followers = (A.followers.get(id) || new Set()).size;
+  const following = (A.following.get(id) || new Set()).size;
   view.innerHTML = '';
   const box = h('div', { class: 'box' });
-  box.append(h('div', { class: 'profile-head' }, avatar(name, true),
-    h('div', {}, h('h2', {}, name), h('div', { class: 'muted' }, posts.length + ' پست در ' + CONFIG.keepDays + ' روز اخیر'))));
-  if (own) {
-    box.append(h('div', { class: 'row', style: 'margin-top:14px' },
-      h('button', { class: 'ghost', onclick: renameUser }, 'ویرایش اسم'),
-      h('button', { class: 'ghost', onclick: logout }, 'خروج')));
+  box.append(h('div', { class: 'profile-head' }, avatar(id, name, true),
+    h('div', {}, h('h2', {}, name), h('div', { class: 'muted' }, `${userPosts.length} پست · ${followers} دنبال‌کننده · ${following} دنبال‌شونده`))));
+  if (prof.bio) box.append(h('p', {}, prof.bio));
+  if (prof.links && prof.links.length) {
+    box.append(h('div', { class: 'links' }, prof.links.filter(l => /^https?:\/\//i.test(l.url)).map(l =>
+      h('a', { href: l.url, target: '_blank', rel: 'noopener nofollow ugc' }, l.name || l.url))));
   }
-  view.append(box, list(posts, own ? 'هنوز پستی نذاشتی.' : 'این کاربر پست فعالی نداره.'));
+  const row = h('div', { class: 'row', style: 'margin-top:12px' });
+  if (mine) {
+    row.append(h('button', { class: 'ghost', onclick: viewEditProfile }, 'ویرایش پروفایل'),
+      h('button', { class: 'ghost', onclick: renameUser }, 'تغییر اسم'),
+      h('button', { class: 'ghost', onclick: logout }, 'خروج'));
+  } else if (user) {
+    const f = (A.following.get(user.$id) || new Set()).has(id);
+    row.append(h('button', { class: f ? 'ghost' : '', onclick: async () => { await toggleFollow(id); viewProfile(id); } }, f ? 'آنفالو' : 'فالو'),
+      h('button', { class: 'ghost', onclick: async () => { await toggleBlock(id); viewProfile(id); } }, A.blocked.has(id) ? 'آنبلاک' : 'بلاک'));
+  }
+  box.append(row);
+  view.append(box);
+  if (mine) {
+    const tab = (label, key) => h('button', { class: 'tab' + (profTab === key ? ' on' : ''), onclick: () => { profTab = key; viewProfile(id); } }, label);
+    view.append(h('div', { class: 'tabs' }, tab('پست‌ها', 'posts'), tab('ذخیره‌ها', 'saved'), tab('لایک‌شده‌ها', 'liked')));
+    if (profTab === 'saved') {
+      const byList = new Map();
+      A.mySaves.forEach(r => { const p = posts.find(x => x.$id === r.targetId); if (p) { const k = r.text || 'save'; if (!byList.has(k)) byList.set(k, []); byList.get(k).push(p); } });
+      if (!byList.size) view.append(h('div', { class: 'empty' }, 'چیزی ذخیره نکردی. پست‌های ذخیره‌شده بعد از ' + CONFIG.keepDays + ' روز با خود پست پاک می‌شن.'));
+      byList.forEach((ps, k) => { view.append(h('h3', {}, '🔖 ' + k)); view.append(list(ps, '')); });
+      return;
+    }
+    if (profTab === 'liked') {
+      view.append(list(posts.filter(p => (A.likes.get(p.$id) || new Set()).has(id)), 'هنوز چیزی رو لایک نکردی.'));
+      return;
+    }
+  }
+  view.append(list(userPosts, mine ? 'هنوز پستی نذاشتی.' : 'این کاربر پست فعالی نداره.'));
+}
+
+// ---------- ویرایش پروفایل و اسم ----------
+function viewEditProfile() {
+  const prof = A.profiles.get(user.$id) || {};
+  view.innerHTML = '';
+  const bio = h('textarea', { rows: '3', maxlength: '300', placeholder: 'بیو' }); bio.value = prof.bio || '';
+  const file = h('input', { type: 'file', accept: 'image/*' });
+  const links = [0, 1, 2, 3].map(i => {
+    const l = (prof.links || [])[i] || {};
+    const n = h('input', { placeholder: 'اسم لینک (مثلاً اینستاگرام)', maxlength: '30' }); n.value = l.name || '';
+    const u = h('input', { placeholder: 'https://...', dir: 'ltr', maxlength: '200' }); u.value = l.url || '';
+    return { n, u };
+  });
+  const save = h('button', {}, 'ذخیره');
+  save.onclick = async () => {
+    save.disabled = true;
+    const ok = await act(0, async () => {
+      let avatarId = prof.avatar || null;
+      if (file.files[0]) {
+        const up = await compressImage(file.files[0], 256, 0.8);
+        avatarId = (await storage.createFile(CONFIG.bucketId, ID.unique(), up, pubPerms())).$id;
+      }
+      const ls = links.map(x => ({ name: x.n.value.trim(), url: x.u.value.trim() })).filter(x => /^https?:\/\//i.test(x.url));
+      const data = JSON.stringify({ bio: bio.value.trim(), links: ls, avatar: avatarId });
+      const pid = 'p' + user.$id;
+      try { await databases.updateDocument(DB, CONFIG.actionsId, pid, { data }); }
+      catch (e) {
+        if (e.code !== 404) throw e;
+        await databases.createDocument(DB, CONFIG.actionsId, pid, { kind: 'profile', userId: user.$id, userName: me(), data },
+          [Permission.read(Role.any()), Permission.update(Role.user(user.$id)), Permission.delete(Role.user(user.$id))]);
+      }
+    });
+    save.disabled = false;
+    if (ok) { A.loaded = 0; toast('ذخیره شد'); location.hash = '#/me'; route(); }
+  };
+  view.append(h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'ویرایش پروفایل'),
+    h('label', {}, 'عکس پروفایل'), file, bio,
+    h('p', { class: 'muted' }, 'لینک شبکه‌های اجتماعی (فقط آدرس‌هایی که با https شروع می‌شن)'),
+    ...links.flatMap(x => [x.n, x.u]),
+    h('div', { class: 'row' }, save, h('button', { class: 'ghost', onclick: () => route() }, 'انصراف'))));
+}
+async function claimName(n) {
+  const id = await hid('n', n.trim().toLowerCase());
+  await databases.createDocument(DB, CONFIG.actionsId, id, { kind: 'name', userId: user.$id, userName: n.trim() }, pubPerms());
+}
+async function setName(n) {
+  n = n.trim();
+  if (n.length < 2 || n.length > 30) throw new Error('اسم باید بین ۲ تا ۳۰ حرف باشه');
+  const old = user.name;
+  try { await claimName(n); }
+  catch (e) { throw new Error(e.code === 409 ? 'این اسم قبلاً گرفته شده' : (e.message || 'اسم ثبت نشد')); }
+  await account.updateName(n);
+  if (old && old.trim().toLowerCase() !== n.toLowerCase()) {
+    try { await databases.deleteDocument(DB, CONFIG.actionsId, await hid('n', old.trim().toLowerCase())); } catch {}
+  }
+  A.loaded = 0; await checkUser();
 }
 async function renameUser() {
   const n = prompt('اسم جدیدت رو بنویس', user.name || '');
-  if (!n || !n.trim()) return;
-  try { await account.updateName(n.trim()); await checkUser(); route(); toast('اسم عوض شد. پست‌های قدیمی با اسم قبلی می‌مونن.'); }
-  catch (e) { toast(e.message || 'اسم عوض نشد'); }
+  if (!n) return;
+  if (!actionsReady()) return toast('این بخش هنوز تنظیم نشده');
+  try { await setName(n); toast('اسم عوض شد. اسم پست‌های قدیمیت هم عوض می‌شه.'); route(); }
+  catch (e) { toast(e.message); }
+}
+function viewChooseName() {
+  view.innerHTML = '';
+  const input = h('input', { placeholder: 'اسم یکتای تو', maxlength: '30' });
+  const btn = h('button', {}, 'ثبت اسم');
+  btn.onclick = async () => {
+    btn.disabled = true;
+    try { await setName(input.value); route(); } catch (e) { toast(e.message); }
+    btn.disabled = false;
+  };
+  view.append(h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'اسمت رو انتخاب کن'),
+    h('p', { class: 'muted' }, 'هر اسم فقط یک نفر می‌تونه داشته باشه.'), input, btn));
 }
 async function logout() {
   try { await account.deleteSession('current'); } catch {}
   user = null; prefs = { types: {}, authors: {} }; $('loginTop').style.display = '';
-  location.hash = '#/posts'; route();
+  indexActions(); location.hash = '#/posts'; route();
 }
 
+// ---------- ورود با کد ایمیل ----------
 function viewLogin() {
   view.innerHTML = '';
-  const name = h('input', { placeholder: 'اسم (برای بار اول)' });
   const email = h('input', { type: 'email', placeholder: 'ایمیل', dir: 'ltr' });
   const code = h('input', { placeholder: 'کد ۶ رقمی', dir: 'ltr', inputmode: 'numeric', maxlength: '6' });
   const info = h('p', { class: 'muted' });
   const sendBtn = h('button', {}, 'ارسال کد به ایمیل');
   const enterBtn = h('button', {}, 'ورود');
   let userId = null;
-  const step1 = h('div', {}, name, email, sendBtn);
+  const step1 = h('div', {}, email, sendBtn);
   const back = h('button', { class: 'ghost', onclick: () => { step2.style.display = 'none'; step1.style.display = ''; } }, 'تغییر ایمیل');
   const step2 = h('div', { style: 'display:none' }, info, code, h('div', { class: 'row' }, enterBtn, back));
-
   sendBtn.onclick = async () => {
     if (!email.value.trim()) return toast('ایمیلت رو بنویس');
     sendBtn.disabled = true;
@@ -340,43 +620,32 @@ function viewLogin() {
   };
   enterBtn.onclick = async () => {
     enterBtn.disabled = true;
-    try {
-      await account.createSession(userId, code.value.trim());
-      const u = await account.get();
-      if (!u.name && name.value.trim()) await account.updateName(name.value.trim());
-      await checkUser(); location.hash = '#/posts'; route();
-    } catch (e) { toast(e.message || 'کد درست نیست'); }
+    try { await account.createSession(userId, code.value.trim()); await checkUser(); location.hash = '#/posts'; route(); }
+    catch (e) { toast(e.message || 'کد درست نیست'); }
     enterBtn.disabled = false;
   };
-  view.append(h('section', { class: 'box' },
-    h('h2', { style: 'margin-top:0' }, 'ورود یا ثبت‌نام'),
+  view.append(h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'ورود یا ثبت‌نام'),
     h('p', { class: 'muted' }, 'رمز لازم نیست. یه کد به ایمیلت می‌فرستیم و با همون وارد می‌شی. تا کد رو وارد نکنی وارد برنامه نمی‌شی.'),
     step1, step2));
 }
-
-// ---------- تأیید ایمیل ----------
 function verifyNotice() {
-  return h('section', { class: 'box' },
-    h('h2', { style: 'margin-top:0' }, 'ایمیلت رو تأیید کن'),
-    h('p', {}, 'برای پست گذاشتن و چت کردن باید ایمیلت تأیید بشه. یه ایمیل با لینک تأیید برات فرستادیم (پوشه‌ی اسپم رو هم نگاه کن). لینک رو تو همین مرورگر باز کن.'),
+  return h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'ایمیلت رو تأیید کن'),
+    h('p', {}, 'برای استفاده از برنامه باید ایمیلت تأیید بشه. یه ایمیل با لینک تأیید برات می‌فرستیم. لینک رو تو همین مرورگر باز کن.'),
     h('div', { class: 'row' },
-      h('button', { onclick: async () => {
-        try { await account.createVerification(location.origin + location.pathname); toast('ایمیل دوباره فرستاده شد'); }
-        catch (e) { toast(e.message || 'ارسال نشد'); } } }, 'ارسال دوباره ایمیل'),
+      h('button', { onclick: async () => { try { await account.createVerification(location.origin + location.pathname); toast('ایمیل فرستاده شد'); } catch (e) { toast(e.message || 'ارسال نشد'); } } }, 'ارسال ایمیل تأیید'),
       h('button', { class: 'ghost', onclick: async () => { await checkUser(); route(); } }, 'تأیید کردم')));
 }
 
 // ---------- پست جدید ----------
-function compressImage(file) {
+function compressImage(file, maxW, q) {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const scale = Math.min(1, CONFIG.maxImageWidth / img.width);
+      const scale = Math.min(1, maxW / img.width);
       const c = document.createElement('canvas');
       c.width = Math.round(img.width * scale); c.height = Math.round(img.height * scale);
       c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      c.toBlob(b => b ? resolve(new File([b], 'photo.jpg', { type: 'image/jpeg' })) : reject('فشرده‌سازی عکس انجام نشد'),
-        'image/jpeg', CONFIG.imageQuality);
+      c.toBlob(b => b ? resolve(new File([b], 'photo.jpg', { type: 'image/jpeg' })) : reject('فشرده‌سازی عکس انجام نشد'), 'image/jpeg', q);
       URL.revokeObjectURL(img.src);
     };
     img.onerror = () => reject('این عکس باز نشد');
@@ -394,7 +663,6 @@ function videoDuration(file) {
 function viewNew() {
   if (!user) { toast('اول وارد شو'); location.hash = '#/login'; return; }
   view.innerHTML = '';
-  if (!user.emailVerification) { view.append(verifyNotice()); return; }
   const file = h('input', { type: 'file', accept: 'image/*,video/*' });
   const text = h('textarea', { rows: '5', maxlength: '2000', placeholder: 'تجربه‌ات رو بنویس (عکس یا ویدیو اختیاریه)' });
   const status = h('p', { class: 'muted' });
@@ -405,31 +673,21 @@ function viewNew() {
     btn.disabled = true;
     try {
       let type = 'text', fileId = 'none';
-      const perms = [Permission.read(Role.any()), Permission.delete(Role.user(user.$id))];
+      const perms = [Permission.read(Role.any()), Permission.update(Role.user(user.$id)), Permission.delete(Role.user(user.$id))];
       if (f) {
         let upload = f;
-        if (f.type.startsWith('image/')) {
-          type = 'image'; status.textContent = 'در حال فشرده‌سازی عکس...';
-          upload = await compressImage(f);
-        } else if (f.type.startsWith('video/')) {
+        if (f.type.startsWith('image/')) { type = 'image'; status.textContent = 'در حال فشرده‌سازی عکس...'; upload = await compressImage(f, CONFIG.maxImageWidth, CONFIG.imageQuality); }
+        else if (f.type.startsWith('video/')) {
           type = 'video';
-          const dur = await videoDuration(f);
-          if (dur > CONFIG.maxVideoSeconds) throw `ویدیو باید حداکثر ${CONFIG.maxVideoSeconds} ثانیه باشه`;
+          if ((await videoDuration(f)) > CONFIG.maxVideoSeconds) throw `ویدیو باید حداکثر ${CONFIG.maxVideoSeconds} ثانیه باشه`;
         } else throw 'فقط عکس یا ویدیو';
         if (upload.size > CONFIG.maxFileMB * 1024 * 1024) throw `حجم فایل باید کمتر از ${CONFIG.maxFileMB} مگابایت باشه`;
         status.textContent = 'در حال آپلود...';
-        fileId = (await storage.createFile(CONFIG.bucketId, ID.unique(), upload, perms)).$id;
+        fileId = (await storage.createFile(CONFIG.bucketId, ID.unique(), upload, [Permission.read(Role.any()), Permission.delete(Role.user(user.$id))])).$id;
       }
-      await databases.createDocument(CONFIG.databaseId, CONFIG.collectionId, ID.unique(), {
-        userId: user.$id,
-        userName: user.name || user.email.split('@')[0],
-        text: t, fileId, type
-      }, perms);
+      await databases.createDocument(DB, POSTS, ID.unique(), { userId: user.$id, userName: me(), text: t, fileId, type }, perms);
       loadedAt = 0; toast('منتشر شد'); location.hash = '#/me';
-    } catch (e) {
-      toast(typeof e === 'string' ? e : (e.message || 'آپلود انجام نشد'));
-      status.textContent = '';
-    }
+    } catch (e) { toast(typeof e === 'string' ? e : (e.message || 'آپلود انجام نشد')); status.textContent = ''; }
     btn.disabled = false;
   };
   view.append(h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'پست جدید'), file, text, btn, status));
@@ -440,47 +698,41 @@ let chatTimer = null;
 async function viewChat() {
   if (!user) { toast('اول وارد شو'); location.hash = '#/login'; return; }
   view.innerHTML = '';
-  if (!user.emailVerification) { view.append(verifyNotice()); return; }
-  if (!CONFIG.messagesId || CONFIG.messagesId.startsWith('YOUR')) {
-    view.innerHTML = '<div class="empty">چت هنوز تنظیم نشده.</div>'; return;
-  }
   const box = h('div', { class: 'bubbles' });
   const input = h('input', { placeholder: 'پیام بنویس...', maxlength: '500', style: 'flex:1;margin:0' });
   const send = h('button', {}, 'ارسال');
-  view.append(
-    h('p', { class: 'muted' }, 'چت عمومی: همه‌ی کاربرا این پیام‌ها رو می‌بینن. پیام‌ها بعد از ' + CONFIG.keepDays + ' روز پاک می‌شن.'),
+  view.append(h('p', { class: 'muted' }, 'چت عمومی: همه‌ی کاربرا این پیام‌ها رو می‌بینن. پیام‌ها بعد از ' + CONFIG.keepDays + ' روز پاک می‌شن.'),
     box, h('div', { class: 'sendbar' }, input, send));
   let lastKey = null;
   const draw = msgs => {
-    const key = msgs.map(m => m.$id).join(',');
+    const key = msgs.map(m => m.$id + (A.names.get(m.userId) || '')).join(',');
     if (key === lastKey) return;
     lastKey = key;
     box.innerHTML = '';
     if (!msgs.length) box.append(h('div', { class: 'empty' }, 'هنوز پیامی نیست. اولین نفر باش.'));
-    msgs.forEach(m => box.append(h('div', { class: 'b' + (m.userId === user.$id ? ' me' : '') },
-      h('a', { class: 'bn', href: '#/u/' + m.userId }, m.userName || 'کاربر'),
+    msgs.forEach(m => box.append(h('div', { class: 'b' + (own(m.userId) ? ' me' : '') },
+      h('a', { class: 'bn', href: '#/u/' + m.userId }, nameOf(m.userId, m.userName)),
       h('div', {}, m.text),
-      h('div', { class: 'bt' }, timeAgo(m.$createdAt)))));
+      h('div', { class: 'bt' }, timeAgo(m.$createdAt), own(m.userId) && ' · ',
+        own(m.userId) && h('a', { href: '#', class: 'bn', style: 'display:inline', onclick: async e => {
+          e.preventDefault();
+          if (!confirm('پیام حذف بشه؟')) return;
+          try { await databases.deleteDocument(DB, MSG, m.$id); lastKey = null; load(); } catch (er) { toast(er.message || 'حذف نشد'); }
+        } }, 'حذف')))));
     window.scrollTo(0, document.body.scrollHeight);
   };
   const load = async () => {
     try {
-      const res = await databases.listDocuments(CONFIG.databaseId, CONFIG.messagesId,
-        [Query.orderDesc('$createdAt'), Query.limit(50)]);
+      fetchActions(false).catch(() => {});
+      const res = await databases.listDocuments(DB, MSG, [Query.orderDesc('$createdAt'), Query.limit(50)]);
       draw(res.documents.slice().reverse());
-    } catch (e) {
-      lastKey = null;
-      box.innerHTML = '<div class="empty">پیام‌ها بارگذاری نشد: ' + (e.message || '') + '</div>';
-    }
+    } catch (e) { lastKey = null; box.innerHTML = '<div class="empty">پیام‌ها بارگذاری نشد: ' + (e.message || '') + '</div>'; }
   };
   send.onclick = async () => {
-    const t = input.value.trim();
-    if (!t) return;
+    const t = input.value.trim(); if (!t) return;
     send.disabled = true;
     try {
-      await databases.createDocument(CONFIG.databaseId, CONFIG.messagesId, ID.unique(), {
-        userId: user.$id, userName: user.name || user.email.split('@')[0], text: t
-      }, [Permission.delete(Role.user(user.$id))]);
+      await databases.createDocument(DB, MSG, ID.unique(), { userId: user.$id, userName: me(), text: t }, [Permission.delete(Role.user(user.$id))]);
       input.value = ''; await load();
     } catch (e) { toast(e.message || 'ارسال نشد'); }
     send.disabled = false;
@@ -493,19 +745,17 @@ async function viewChat() {
 // ---------- مسیریابی ----------
 function route() {
   const navEl = document.querySelector('nav');
+  clearInterval(chatTimer);
   if (user && !user.emailVerification) {
-    // تا ایمیل تأیید نشده، هیچ بخشی از برنامه باز نمی‌شه
-    navEl.style.display = 'none';
-    clearInterval(chatTimer);
-    view.innerHTML = '';
+    navEl.style.display = 'none'; view.innerHTML = '';
     view.append(verifyNotice(), h('button', { class: 'ghost', onclick: logout }, 'خروج'));
     return;
   }
+  if (user && !user.name && actionsReady()) { navEl.style.display = 'none'; viewChooseName(); return; }
   navEl.style.display = '';
   const parts = (location.hash || '#/posts').split('/');
   const page = parts[1] || 'posts', arg = parts[2];
   document.querySelectorAll('nav a').forEach(a => a.classList.toggle('on', a.dataset.p === page));
-  clearInterval(chatTimer);
   if (page !== 'chat') window.scrollTo(0, 0);
   if (page === 'chat') viewChat();
   else if (page === 'search') viewSearch();
@@ -523,7 +773,9 @@ window.addEventListener('hashchange', route);
     catch (e) { toast('لینک تأیید معتبر نیست یا باید تو همون مرورگری که واردش شدی بازش کنی'); }
     history.replaceState(null, '', location.pathname + (location.hash || ''));
   }
-  await checkUser(); route();
+  await checkUser();
+  if (user && user.name && actionsReady()) { claimName(user.name).catch(() => {}); }
+  route();
 })();
 </script>
 </body>
