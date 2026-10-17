@@ -1,8 +1,8 @@
-name: Weekly cleanup
+name: Daily cleanup
 
 on:
   schedule:
-    - cron: '0 3 * * 0'
+    - cron: '0 3 * * *'
   workflow_dispatch:
 
 jobs:
@@ -13,12 +13,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-      - name: Delete old posts and files
+      - name: Delete old data
         run: node cleanup.mjs
         env:
           APPWRITE_ENDPOINT: https://fra.cloud.appwrite.io/v1
           APPWRITE_PROJECT: 6ace411d003d049156b2
           APPWRITE_DB: 6acf982f001971779a2c
           APPWRITE_COLLECTION: 6acf990e0020720c9550
+          APPWRITE_MESSAGES: 6ad0beeb0037f9256400
+          APPWRITE_ACTIONS: 6ad1b34a000658debecf
           APPWRITE_BUCKET: 6acf9c8b003cff99b09a
           APPWRITE_KEY: ${{ secrets.APPWRITE_KEY }}
