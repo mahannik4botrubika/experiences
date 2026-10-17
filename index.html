@@ -57,7 +57,10 @@
   .badge { position:absolute; top:-2px; right:-2px; background:#e03131; color:#fff; border-radius:999px; font-size:11px; padding:0 5px; }
   .ri { height:100%; scroll-snap-align:start; scroll-snap-stop:always; position:relative; color:#fff; background:#000; overflow:hidden; }
   .ri video, .ri img.full { position:absolute; inset:0; width:100%; height:100%; object-fit:contain; background:#000; }
-  .ri .txt { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; padding:40px 70px 120px 32px; text-align:center; font-size:22px; background:linear-gradient(160deg,#1f6f6b,#162a3a); white-space:pre-wrap; word-break:break-word; }
+  .ri .txt { position:absolute; inset:0; overflow-y:auto; padding:64px 20px 120px 72px; font-size:22px; line-height:1.9; text-align:center; background:linear-gradient(160deg,#1f6f6b,#162a3a); white-space:pre-wrap; word-break:break-word; display:flex; flex-direction:column; }
+  .ri .txt .tb { margin:auto 0; }
+  .ri .txt.long { text-align:start; font-size:17px; }
+  .ri .txt a { color:#ffd166; }
   .ri .shade { position:absolute; right:0; left:0; bottom:0; height:50%; background:linear-gradient(transparent,rgba(0,0,0,.7)); pointer-events:none; }
   .ri .info { position:absolute; right:12px; left:76px; bottom:14px; text-shadow:0 1px 3px #000; }
   .ri .info a { color:#fff; font-weight:bold; text-decoration:none; }
@@ -148,7 +151,7 @@ const CONFIG = {
   collectionId: '6acf990e0020720c9550',   // جدول posts
   bucketId: '6acf9c8b003cff99b09a',
   messagesId: '6ad0beeb0037f9256400',     // جدول messages
-  actionsId: 'YOUR_ACTIONS_TABLE_ID',     // جدول actions
+  actionsId: '6ad1b34a000658debecf',     // جدول actions
   adminId: '',                            // جدول admin (اختیاری، برای پنل ادمین)
   supportTelegram: '@botboshtibani',
   premiumPrice: '۵۰٬۰۰۰ تومان',
@@ -532,7 +535,7 @@ async function removePost(d) {
 async function editPost(d) {
   const t = prompt('متن جدید پست', d.text || '');
   if (t === null) return false;
-  try { await databases.updateDocument(DB, POSTS, d.$id, { text: t.trim().slice(0, 2000) }); loadedAt = 0; return true; }
+  try { await databases.updateDocument(DB, POSTS, d.$id, { text: t.trim().slice(0, 20000) }); loadedAt = 0; return true; }
   catch (e) { toast(e.message || 'ویرایش نشد (پست‌های قدیمی که قبل از این نسخه گذاشتی قابل ویرایش نیستن)'); return false; }
 }
 async function sharePost(d) {
@@ -673,7 +676,7 @@ function reelItem(d, onRemoved) {
     car.onscroll = () => { cnt.textContent = (Math.round(Math.abs(car.scrollLeft) / car.clientWidth) + 1) + '/' + files.length; };
     el.append(car, cnt);
   } else {
-    el.append(h('div', { class: 'txt' }, richText(d.text)));
+    el.append(h('div', { class: 'txt' + ((d.text || '').length > 280 ? ' long' : '') }, h('div', { class: 'tb' }, richText(d.text))));
   }
   el.append(h('div', { class: 'shade' }));
 
@@ -682,7 +685,7 @@ function reelItem(d, onRemoved) {
     mainVideo._hold = true;
     const ad = h('div', { class: 'ad' },
       h('div', { style: 'font-size:18px;margin-bottom:8px' }, 'حمایت و رفع تبلیغات'),
-      h('div', {}, 'برای خرید اشتراک پرمیوم (' + CONFIG.premiumPrice + ') به ' + CONFIG.supportTelegram + ' پیام بده.'));
+      h('div', {}, 'برای خرید اشتراک پرمیوم (' + CONFIG.premiumPrice + ') تو تلگرام به ', h('b', { dir: 'ltr' }, CONFIG.supportTelegram), ' پیام بده.'));
     el.append(ad);
     new IntersectionObserver((es, ob) => {
       if (es[0].isIntersecting) { ob.disconnect(); setTimeout(() => { ad.remove(); mainVideo._hold = false; mainVideo.muted = globalMuted; mainVideo.play().catch(() => {}); }, AD_MS); }
@@ -1119,7 +1122,7 @@ function viewNew(asStory) {
   if (!user) { toast('اول وارد شو'); location.hash = '#/login'; return; }
   view.innerHTML = '';
   const file = h('input', { type: 'file', accept: 'image/*,video/*', multiple: '' });
-  const text = h('textarea', { rows: '4', maxlength: '2000', placeholder: 'تجربه‌ات رو بنویس (عکس و ویدیو اختیاریه، تا ۶ فایل)' });
+  const text = h('textarea', { rows: '4', maxlength: '20000', placeholder: 'تجربه‌ات یا مقاله‌ات رو بنویس (عکس و ویدیو اختیاریه، تا ۱۰ فایل)' });
   const poll = h('textarea', { rows: '3', placeholder: 'نظرسنجی (اختیاری): هر خط یه گزینه، حداکثر ۴ تا' });
   const when = h('input', { type: 'datetime-local' });
   const priv = h('input', { type: 'checkbox' });
@@ -1127,7 +1130,7 @@ function viewNew(asStory) {
   const status = h('p', { class: 'muted' });
   const btn = h('button', {}, 'انتشار');
   btn.onclick = async () => {
-    const files = [...file.files].slice(0, 6), t = text.value.trim();
+    const files = [...file.files].slice(0, 10), t = text.value.trim();
     if (!files.length && !t) return toast('یه متن بنویس یا عکس/ویدیو انتخاب کن');
     if (story.checked && !files.length) return toast('استوری باید عکس یا ویدیو داشته باشه');
     btn.disabled = true;
@@ -1363,9 +1366,9 @@ function viewRules() {
       h('p', {}, `حداقل مبلغ حمایت برای اشتراک: ${CONFIG.premiumPrice}`),
       h('p', {}, 'با اشتراک، ۶ ماه تبلیغات نمی‌بینی و می‌تونی تو کامنت‌ها گیف و عکس بذاری.'),
       CONFIG.cardNumber && h('p', {}, 'شماره کارت: ', h('b', { dir: 'ltr' }, CONFIG.cardNumber)),
-      h('p', {}, 'رسید پرداخت رو به ', h('b', { dir: 'ltr' }, CONFIG.supportTelegram), ' تو تلگرام بفرست تا ادمین اشتراکت رو فعال کنه.')),
+      h('p', {}, 'رسید پرداخت رو تو تلگرام به ', h('b', { dir: 'ltr' }, CONFIG.supportTelegram), ' بفرست تا ادمین اشتراکت رو فعال کنه.')),
     h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'پنل پشتیبانی'),
-      h('p', { class: 'muted' }, 'سؤال یا مشکلت رو بنویس. ادمین‌ها بررسی می‌کنن و تو تلگرام ' + CONFIG.supportTelegram + ' هم می‌تونی پیگیری کنی.'), t, send));
+      h('p', { class: 'muted' }, 'سؤال یا مشکلت رو بنویس. ادمین‌ها بررسی می‌کنن و تو تلگرام (' + CONFIG.supportTelegram + ') هم می‌تونی پیگیری کنی.'), t, send));
 }
 
 // ---------- پنل ادمین ----------
