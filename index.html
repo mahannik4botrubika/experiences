@@ -153,6 +153,7 @@ const CONFIG = {
   messagesId: '6ad0beeb0037f9256400',     // جدول messages
   actionsId: '6ad1b34a000658debecf',     // جدول actions
   adminId: '6ad35ef600051b331fd3',                            // جدول admin (اختیاری، برای پنل ادمین)
+  reportsId: '6ad3b704001fdf44a5dc',        // جدول reports (گزارش‌ها و پشتیبانی)
   supportTelegram: '@botboshtibani',
   premiumPrice: '۵۰٬۰۰۰ تومان',
   cardNumber: '',                         // شماره کارت رو خودت اینجا بذار
@@ -477,7 +478,7 @@ async function reportPost(d) {
   const reason = prompt('دلیل گزارش چیه؟');
   if (!reason || !reason.trim()) return;
   const ok = await act(async () => {
-    await databases.createDocument(DB, ACT(), ID.unique(), { kind: 'report', userId: user.$id, userName: me(), targetId: d.$id, text: (reason.trim() + ' | نویسنده: ' + d.userId).slice(0, 1000) }, privPerms());
+    await sendToSupport('report', reason.trim() + ' | نویسنده: ' + nameOf(d.userId, d.userName), d.$id);
   });
   if (ok) toast('گزارش ثبت شد');
 }
