@@ -51,6 +51,7 @@ if (ACTIONS) {
       if (d.kind === 'story') { await delFile(parse(d.data).fileId); await api('DELETE', `/databases/${DB}/collections/${ACTIONS}/documents/${d.$id}`); acts++; }
       else if (old && drop.has(d.kind)) {
         if (d.kind === 'meta') for (const f of (parse(d.data).files || [])) await delFile(f.id);
+        if (d.kind === 'comment') { const m = /\[\[img:([A-Za-z0-9_.-]+)\]\]/.exec(d.text || ''); if (m) await delFile(m[1]); }
         await api('DELETE', `/databases/${DB}/collections/${ACTIONS}/documents/${d.$id}`); acts++;
       } else kept++;
     }
