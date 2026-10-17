@@ -560,6 +560,11 @@ function openSheet(title, body) {
   closeSheetFn = () => { back.remove(); sheet.remove(); closeSheetFn = null; };
   return closeSheetFn;
 }
+function cmImg(src) {
+  const im = h('img', { class: 'cmimg', src, alt: '', style: 'min-height:48px;background:var(--line)', referrerpolicy: 'no-referrer' });
+  im.onerror = () => im.replaceWith(h('a', { href: src, target: '_blank', rel: 'noopener nofollow' }, '🖼 باز کردن عکس'));
+  return im;
+}
 function richText(text) {
   const out = [];
   const re = /(#[\p{L}\p{N}_]+)|(\[\[img:([A-Za-z0-9_.-]+)\]\])|(https?:\/\/\S+)/gu;
@@ -567,8 +572,8 @@ function richText(text) {
   while ((m = re.exec(text || ''))) {
     if (m.index > last) out.push(text.slice(last, m.index));
     if (m[1]) out.push(h('a', { href: '#/search/' + encodeURIComponent(m[1]) }, m[1]));
-    else if (m[3]) out.push(h('img', { class: 'cmimg', src: fileUrl(m[3]), alt: '', loading: 'lazy' }));
-    else if (IMG_URL.test(m[4])) out.push(h('img', { class: 'cmimg', src: m[4], alt: '', loading: 'lazy', referrerpolicy: 'no-referrer' }));
+    else if (m[3]) out.push(cmImg(fileUrl(m[3])));
+    else if (IMG_URL.test(m[4])) out.push(cmImg(m[4]));
     else out.push(h('a', { href: m[4], target: '_blank', rel: 'noopener nofollow ugc' }, m[4]));
     last = m.index + m[0].length;
   }
