@@ -155,6 +155,7 @@ const CONFIG = {
   adminId: '6ad35ef600051b331fd3',                            // جدول admin (اختیاری، برای پنل ادمین)
   reportsId: '6ad3b704001fdf44a5dc',        // جدول reports (گزارش‌ها و پشتیبانی)
   supportTelegram: '@botboshtibani',
+  supportEitaa: '@poshtibanyex',
   premiumPrice: '۵۰٬۰۰۰ تومان',
   cardNumber: '',                         // شماره کارت رو خودت اینجا بذار
   maxFileMB: 20, maxVideoSeconds: 60, maxImageWidth: 1280, imageQuality: 0.75, keepDays: 7
@@ -254,7 +255,7 @@ function savePrefs() {
 
 // ---------- داده‌ی تعامل‌ها ----------
 let A = { rows: [], views: [], loaded: 0 };
-let AD = { rows: [], loaded: 0, verified: new Set(), premium: new Map(), bans: new Map() };
+let AD = { rows: [], loaded: 0, verified: new Set(), premium: new Map(), bans: new Map(), ads: [] };
 function addTo(map, key, val) { if (!map.has(key)) map.set(key, new Set()); map.get(key).add(val); }
 function pushTo(map, key, val) { if (!map.has(key)) map.set(key, []); map.get(key).push(val); }
 const jparse = s => { try { return JSON.parse(s || '{}'); } catch { return {}; } };
@@ -323,13 +324,14 @@ async function fetchAdmin(force) {
   if (!force && AD.loaded && Date.now() - AD.loaded < 60000) return;
   try { AD.rows = await pageAll(CONFIG.adminId, [Query.orderDesc('$createdAt')], 5); } catch { AD.rows = []; }
   AD.loaded = Date.now();
-  AD.verified = new Set(); AD.premium = new Map(); AD.bans = new Map();
+  AD.verified = new Set(); AD.premium = new Map(); AD.bans = new Map(); AD.ads = [];
   const now = Date.now();
   for (const r of AD.rows) {
     const until = r.until ? new Date(r.until).getTime() : Infinity;
     if (r.kind === 'verified') AD.verified.add(r.targetId);
     else if (r.kind === 'premium' && until > now) AD.premium.set(r.targetId, until);
     else if (r.kind === 'ban' && until > now) AD.bans.set(r.targetId, { until, reason: r.text, id: r.$id });
+    else if (r.kind === 'ad') AD.ads.push({ id: r.$id, fileId: r.targetId, ...jparse(r.text) });
   }
 }
 const isVerified = uid => AD.verified.has(uid);
@@ -340,7 +342,8 @@ async function act(fn) {
   try { await fn(); return true; } catch (e) { toast(e.message || 'انجام نشد'); return false; }
 }
 const nameOf = (uid, fallback) => A.names.get(uid) || fallback || 'کاربر';
-function nameEl(uid, fallback) { return h('span', {}, nameOf(uid, fallback), isVerified(uid) && h('span', { class: 'tick', title: 'تأییدشده' }, '✔'), isPremium(uid) && h('span', { title: 'پرمیوم', style: 'margin-inline-start:4px' }, '⭐')); }
+function nameEl(uid, fallback) { return h('span', {}, nameOf(uid, fallback), (isVerified(uid) || isPremium(uid)) && h('span', { class: 'tick', title: 'تأییدشده' }, '✔')); }
+function adContact() { return h('span', {}, 'تلگرام ', h('b', { dir: 'ltr' }, CONFIG.supportTelegram), ' یا ایتا ', h('b', { dir: 'ltr' }, CONFIG.supportEitaa)); }
 function avatar(uid, name, big) {
   const p = A.profiles.get(uid);
   if (p && p.avatar) return h('img', { class: 'avatar' + (big ? ' big' : ''), src: fileUrl(p.avatar), alt: '' });
@@ -715,13 +718,31 @@ function reelItem(d, onRemoved) {
   // تبلیغ قبل از ویدیو برای کسایی که اشتراک ندارن
   if (mainVideo && !isPremium(user && user.$id)) {
     mainVideo._hold = true;
-    const ad = h('div', { class: 'ad' },
-      h('div', { style: 'font-size:18px;margin-bottom:8px' }, 'حمایت و رفع تبلیغات'),
-      h('div', {}, 'برای خرید اشتراک پرمیوم (' + CONFIG.premiumPrice + ') تو تلگرام به ', h('b', { dir: 'ltr' }, CONFIG.supportTelegram), ' پیام بده.'));
+    const ad = h('div', { class: 'ad' });
     el.append(ad);
-    new IntersectionObserver((es, ob) => {
-      if (es[0].isIntersecting) { ob.disconnect(); setTimeout(() => { ad.remove(); mainVideo._hold = false; mainVideo.muted = globalMuted; mainVideo.play().catch(() => {}); }, AD_MS); }
-    }, { threshold: 0.7 }).observe(el);
+    const finish = () => { if (!ad.isConnected) return; ad.remove(); mainVideo._hold = false; mainVideo.muted = globalMuted; mainVideo.play().catch(() => {}); };
+    const buy = h('div', { style: 'position:absolute;right:12px;left:12px;bottom:16px;text-align:center;font-size:13px;text-shadow:0 1px 3px #000;z-index:4' },
+      'حذف تبلیغات و تیک آبی (' + CONFIG.premiumPrice + '): ', adContact());
+    const startAd = () => {
+      const pick = AD.ads.length ? AD.ads[Math.floor(Math.random() * AD.ads.length)] : null;
+      if (!pick) {
+        ad.append(h('div', { style: 'font-size:18px;margin-bottom:8px' }, 'حمایت و رفع تبلیغات'), h('div', {}, 'برای خرید اشتراک پرمیوم (' + CONFIG.premiumPrice + ') پیام بده: ', adContact()));
+        setTimeout(finish, AD_MS); return;
+      }
+      const st = 'position:absolute;inset:0;width:100%;height:100%;object-fit:contain';
+      let m;
+      if (pick.type === 'video') { m = h('video', { src: fileUrl(pick.fileId), playsinline: '', style: st }); m.muted = globalMuted; m.onended = finish; m.onerror = finish; }
+      else { m = h('img', { src: fileUrl(pick.fileId), alt: '', style: st }); m.onerror = finish; setTimeout(finish, 5000); }
+      if (pick.link && /^https?:\/\//i.test(pick.link)) m.onclick = () => window.open(pick.link, '_blank', 'noopener');
+      ad.append(m, buy);
+      if (pick.type === 'video') m.play().catch(() => { m.muted = true; m.play().catch(() => {}); });
+      const skip = h('button', { class: 'small', style: 'position:absolute;top:56px;left:12px;z-index:5;background:rgba(0,0,0,.6);border-color:#fff;color:#fff', disabled: '' }, 'رد کردن بعد از 5');
+      let n = 5;
+      const t = setInterval(() => { n--; if (n > 0) skip.textContent = 'رد کردن بعد از ' + n; else { clearInterval(t); skip.textContent = 'رد کردن'; skip.disabled = false; } }, 1000);
+      skip.onclick = () => { clearInterval(t); finish(); };
+      ad.append(skip);
+    };
+    new IntersectionObserver((es, ob) => { if (es[0].isIntersecting) { ob.disconnect(); startAd(); } }, { threshold: 0.7 }).observe(el);
   }
 
   // نظرسنجی
@@ -1416,11 +1437,11 @@ function viewRules() {
     h('ul', {}, ['کپی‌رایت ممنوعه: محتوای دیگران رو بدون اجازه نذار.', 'فحاشی ممنوعه.', 'توهین و تهمت ممنوعه.', 'محتوای نامناسب ممنوعه.', 'ادمین‌ها می‌تونن پست رو حذف و کاربر رو برای مدت مشخص بن کنن.'].map(x => h('li', {}, x)))),
     h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'اشتراک پرمیوم'),
       h('p', {}, `حداقل مبلغ حمایت برای اشتراک: ${CONFIG.premiumPrice}`),
-      h('p', {}, 'با اشتراک، ۶ ماه تبلیغات نمی‌بینی و می‌تونی تو کامنت‌ها گیف و عکس بذاری.'),
+      h('p', {}, 'با اشتراک تبلیغات نمی‌بینی، تیک آبی می‌گیری و می‌تونی تو کامنت‌ها گیف و عکس بذاری.'),
       CONFIG.cardNumber && h('p', {}, 'شماره کارت: ', h('b', { dir: 'ltr' }, CONFIG.cardNumber)),
-      h('p', {}, 'رسید پرداخت رو تو تلگرام به ', h('b', { dir: 'ltr' }, CONFIG.supportTelegram), ' بفرست تا ادمین اشتراکت رو فعال کنه.')),
+      h('p', {}, 'برای خرید اشتراک و بعد از پرداخت، رسید رو تو تلگرام به ', h('b', { dir: 'ltr' }, CONFIG.supportTelegram), ' یا تو ایتا به ', h('b', { dir: 'ltr' }, CONFIG.supportEitaa), ' بفرست تا ادمین اشتراکت رو فعال کنه.')),
     h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'پنل پشتیبانی'),
-      h('p', { class: 'muted' }, 'سؤال یا مشکلت رو بنویس. ادمین‌ها بررسی می‌کنن و تو تلگرام (' + CONFIG.supportTelegram + ') هم می‌تونی پیگیری کنی.'), t, send));
+      h('p', { class: 'muted' }, 'سؤال یا مشکلت رو بنویس. ادمین‌ها بررسی می‌کنن و تو تلگرام (' + CONFIG.supportTelegram + ') یا ایتا (' + CONFIG.supportEitaa + ') هم می‌تونی پیگیری کنی.'), t, send));
 }
 
 // ---------- پنل ادمین ----------
@@ -1470,6 +1491,28 @@ async function viewAdmin() {
     });
   };
   view.append(h('h2', {}, '🛡 پنل ادمین'), q, res);
+  const adFile = h('input', { type: 'file', accept: 'video/*,image/*' });
+  const adTitle = h('input', { placeholder: 'عنوان تبلیغ (اختیاری)', maxlength: '60' });
+  const adLink = h('input', { placeholder: 'لینک تبلیغ (اختیاری، https://...)', dir: 'ltr', maxlength: '150' });
+  const adBtn = h('button', {}, 'افزودن تبلیغ');
+  adBtn.onclick = async () => {
+    const f = adFile.files[0]; if (!f) return toast('یه ویدیو یا عکس انتخاب کن');
+    if (f.size > CONFIG.maxFileMB * 1024 * 1024) return toast('حجم فایل باید کمتر از ' + CONFIG.maxFileMB + ' مگابایت باشه');
+    const type = f.type.startsWith('video/') ? 'video' : f.type.startsWith('image/') ? 'image' : null;
+    if (!type) return toast('فقط ویدیو یا عکس');
+    adBtn.disabled = true;
+    try {
+      const saved = await storage.createFile(CONFIG.bucketId, ID.unique(), f, [Permission.read(Role.any()), Permission.delete(Role.user(user.$id))]);
+      const text = JSON.stringify({ type, title: adTitle.value.trim(), link: adLink.value.trim() });
+      await databases.createDocument(DB, CONFIG.adminId, ID.unique(), { kind: 'ad', targetId: saved.$id, text }, [Permission.read(Role.any()), Permission.update(Role.label('admin')), Permission.delete(Role.label('admin'))]);
+      toast('تبلیغ اضافه شد'); await fetchAdmin(true); route();
+    } catch (e) { toast(e.message || 'افزودن نشد'); }
+    adBtn.disabled = false;
+  };
+  view.append(h('div', { class: 'box' }, h('h3', { style: 'margin-top:0' }, '📢 تبلیغات قبل از ویدیو'),
+    h('p', { class: 'muted' }, 'هر تبلیغی که اینجا اضافه کنی قبل از ویدیوها به کسایی که اشتراک ندارن نشون داده می‌شه (به‌صورت رندوم).'), adFile, adTitle, adLink, adBtn,
+    ...AD.ads.map(a => h('div', { class: 'row', style: 'margin-top:8px' }, h('span', {}, (a.type === 'video' ? '🎬 ' : '🖼 ') + (a.title || String(a.fileId).slice(0, 8))),
+      h('button', { class: 'danger', onclick: async () => { if (!confirm('این تبلیغ حذف بشه؟')) return; try { await databases.deleteDocument(DB, CONFIG.adminId, a.id); try { await storage.deleteFile(CONFIG.bucketId, a.fileId); } catch {} await fetchAdmin(true); route(); } catch (e) { toast(e.message || 'حذف نشد'); } } }, 'حذف')))));
   const sec = (title, items) => { view.append(h('h3', {}, title)); if (!items.length) view.append(h('div', { class: 'muted' }, '—')); items.forEach(x => view.append(x)); };
   sec('بن‌شده‌ها', [...AD.bans].map(([id, b]) => h('div', {}, nameOf(id, null) + ' تا ' + new Date(b.until).toLocaleDateString('fa-IR') + (b.reason ? ' (' + b.reason + ')' : ''))));
   sec('پرمیوم‌ها', [...AD.premium].map(([id, u]) => h('div', {}, nameOf(id, null) + ' تا ' + new Date(u).toLocaleDateString('fa-IR'))));
