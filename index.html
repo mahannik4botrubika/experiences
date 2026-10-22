@@ -292,10 +292,13 @@ function indexActions() {
 indexActions();
 async function pageAll(col, queries, maxPages) {
   let out = [];
-  for (let p = 0; p < maxPages; p++) {
-    const res = await databases.listDocuments(DB, col, [...queries, Query.limit(100), Query.offset(p * 100)]);
-    out = out.concat(res.documents);
-    if (res.documents.length < 100) break;
+  for (let p = 0; p < maxPages; p += 3) {
+    const n = Math.min(3, maxPages - p);
+    const res = await Promise.all(Array.from({ length: n }, (_, i) =>
+      databases.listDocuments(DB, col, [...queries, Query.limit(100), Query.offset((p + i) * 100)])));
+    let full = true;
+    for (const r of res) { out = out.concat(r.documents); if (r.documents.length < 100) full = false; }
+    if (!full) break;
   }
   return out;
 }
@@ -808,18 +811,38 @@ async function viewPosts() {
   const reel = h('div', { class: 'reel' });
   wrap.append(topBar(), reel);
   view.append(wrap);
-  reel.append(h('div', { class: 'ri' }, h('div', { class: 'txt' }, 'در حال بارگذاری...')));
-  try {
-    const [posts] = await Promise.all([fetchPosts(true), fetchActions(true).catch(() => {}), fetchAdmin(false)]);
-    wrap.replaceChild(topBar(), wrap.firstChild);
-    reel.innerHTML = '';
-    let shown = visible(posts);
-    if (feedTab === 'following') { const f = A.following.get(user ? user.$id : '') || new Set(); shown = shown.filter(p => f.has(p.userId)); }
-    else shown = rank(shown);
-    if (!shown.length) reel.append(h('div', { class: 'ri' }, h('div', { class: 'txt' },
-      feedTab === 'following' ? (user ? 'هنوز کسی رو دنبال نکردی، یا دنبال‌شونده‌هات پستی نذاشتن.' : 'برای دیدن این بخش وارد شو.') : 'هنوز پستی نیست. اولین نفر باش.')));
-    shown.forEach(p => reel.append(reelItem(p)));
-  } catch (e) { reel.innerHTML = ''; reel.append(h('div', { class: 'ri' }, h('div', { class: 'txt' }, 'پست‌ها بارگذاری نشد: ' + (e.message || '')))); }
+  const msg = t => h('div', { class: 'ri' }, h('div', { class: 'txt' }, h('div', { class: 'tb' }, t)));
+  reel.append(msg('در حال بارگذاری...'));
+  try { await Promise.all([fetchActions(false).catch(() => {}), fetchAdmin(false)]); } catch {}
+  wrap.replaceChild(topBar(), wrap.firstChild);
+  const PAGE = 60, BATCH = 6, since = new Date(Date.now() - KEEP_MS).toISOString();
+  const fol = user ? (A.following.get(user.$id) || new Set()) : new Set();
+  const emptyText = feedTab === 'following' ? (user ? 'هنوز کسی رو دنبال نکردی، یا دنبال‌شونده‌هات پستی نذاشتن.' : 'برای دیدن این بخش وارد شو.') : 'هنوز پستی نیست. اولین نفر باش.';
+  let offset = 0, exhausted = false, queue = [], rendered = 0, busy = false;
+  const loadMore = async () => {
+    for (let tries = 0; tries < 5 && !exhausted && queue.length - rendered < BATCH; tries++) {
+      const res = await databases.listDocuments(DB, POSTS, [Query.greaterThan('$createdAt', since), Query.orderDesc('$createdAt'), Query.limit(PAGE), Query.offset(offset)]);
+      offset += res.documents.length;
+      if (res.documents.length < PAGE) exhausted = true;
+      let page = visible(res.documents);
+      page = feedTab === 'following' ? page.filter(p => fol.has(p.userId)) : rank(page);
+      queue.push(...page);
+    }
+  };
+  const more = async () => {
+    if (busy) return; busy = true;
+    try {
+      await loadMore();
+      if (!queue.length) { reel.innerHTML = ''; reel.append(msg(emptyText)); busy = false; return; }
+      if (rendered === 0) reel.innerHTML = '';
+      const end = Math.min(queue.length, rendered + BATCH);
+      for (; rendered < end; rendered++) reel.append(reelItem(queue[rendered]));
+    } catch (e) { if (!rendered) { reel.innerHTML = ''; reel.append(msg('پست‌ها بارگذاری نشد: ' + (e.message || ''))); } }
+    busy = false;
+  };
+  reel.onscroll = () => { if (reel.scrollTop + reel.clientHeight * 3 > reel.scrollHeight) more(); };
+  await more();
+  fetchPosts(false).then(updateBell).catch(() => {});
 }
 async function viewSinglePost(id) {
   document.body.classList.add('reelmode');
@@ -843,7 +866,7 @@ async function viewStories() {
     h('button', { class: 'tab', onclick: () => { feedTab = 'for'; route(); } }, 'برای تو'),
     h('button', { class: 'tab', onclick: () => { feedTab = 'following'; route(); } }, 'اشتراک‌ها'),
     h('button', { class: 'tab on' }, 'استوری‌ها')));
-  try { await Promise.all([fetchActions(true), fetchAdmin(false)]); } catch {}
+  try { await Promise.all([fetchActions(false), fetchAdmin(false)]); } catch {}
   const byUser = new Map();
   A.stories.filter(s => !A.blocked.has(s.userId)).forEach(s => pushTo(byUser, s.userId, s));
   const tray = h('div', { class: 'tray' });
@@ -916,7 +939,7 @@ async function viewProfile(id) {
   document.body.classList.remove('reelmode');
   view.innerHTML = '<div class="empty">در حال بارگذاری...</div>';
   let posts = [];
-  try { [posts] = await Promise.all([fetchPosts(true), fetchActions(true).catch(() => {}), fetchAdmin(false)]); }
+  try { [posts] = await Promise.all([fetchPosts(false), fetchActions(false).catch(() => {}), fetchAdmin(false)]); }
   catch (e) { view.innerHTML = '<div class="empty">بارگذاری نشد: ' + (e.message || '') + '</div>'; return; }
   const mine = own(id);
   if (!mine) recordView('prof_' + id, id);
@@ -1102,7 +1125,7 @@ async function removePostQuiet(p) {
 async function viewPeople(id, kind) {
   document.body.classList.remove('reelmode');
   view.innerHTML = '<div class="empty">در حال بارگذاری...</div>';
-  try { await Promise.all([fetchPosts(false), fetchActions(true), fetchAdmin(false)]); } catch {}
+  try { await Promise.all([fetchPosts(false), fetchActions(false), fetchAdmin(false)]); } catch {}
   const ids = [...((kind === 'following' ? A.following : A.followers).get(id) || new Set())];
   view.innerHTML = '';
   view.append(h('a', { href: '#/u/' + id }, '← برگشت به پروفایل'), h('h2', {}, kind === 'following' ? 'دنبال‌شونده‌ها' : 'دنبال‌کننده‌ها'));
