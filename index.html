@@ -716,7 +716,7 @@ function reelItem(d, onRemoved) {
   el.append(h('div', { class: 'shade' }));
 
   // تبلیغ قبل از ویدیو برای کسایی که اشتراک ندارن
-  if (mainVideo && !isPremium(user && user.$id)) {
+  if (mainVideo && !own(d.userId) && !isPremium(user && user.$id)) {
     mainVideo._hold = true;
     const ad = h('div', { class: 'ad' });
     el.append(ad);
