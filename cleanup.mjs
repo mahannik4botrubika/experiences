@@ -17,7 +17,7 @@ async function api(method, path, queries) {
 const q = (method, attribute, value) => JSON.stringify({ method, attribute, values: [value] });
 const lim = n => JSON.stringify({ method: 'limit', values: [n] });
 const off = n => JSON.stringify({ method: 'offset', values: [n] });
-const delFile = async id => { if (id && id !== 'none') await api('DELETE', `/storage/buckets/${BUCKET}/files/${id}`); };
+const delFile = async id => { if (id && id !== 'none') { await api('DELETE', `/storage/buckets/${BUCKET}/files/${id}`); await api('DELETE', `/storage/buckets/${BUCKET}/files/${id}_p`); } };  // _p = عکس پیش‌نمایش ویدیو
 const parse = s => { try { return JSON.parse(s || '{}'); } catch { return {}; } };
 
 let posts = 0, files = 0, msgs = 0, acts = 0, users = 0;

@@ -61,6 +61,10 @@
   .ri .txt .tb { margin:auto 0; }
   .ri .txt.long { text-align:start; font-size:17px; }
   .ri .txt a { color:#ffd166; }
+  .vload { position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center; gap:10px; z-index:1; pointer-events:none; color:#fff; font-size:14px; text-shadow:0 1px 3px #000; }
+  .vload.on { display:flex; }
+  .vload i { width:34px; height:34px; border:3px solid rgba(255,255,255,.35); border-top-color:#fff; border-radius:50%; animation:vspin .8s linear infinite; }
+  @keyframes vspin { to { transform:rotate(360deg); } }
   .ri .shade { position:absolute; right:0; left:0; bottom:0; height:50%; background:linear-gradient(transparent,rgba(0,0,0,.7)); pointer-events:none; }
   .ri .info { position:absolute; right:12px; left:76px; bottom:14px; text-shadow:0 1px 3px #000; }
   .ri .info a { color:#fff; font-weight:bold; text-decoration:none; }
@@ -158,7 +162,7 @@ const CONFIG = {
   supportEitaa: '@poshtibanyex',
   premiumPrice: '۵۰٬۰۰۰ تومان',
   cardNumber: '',                         // شماره کارت رو خودت اینجا بذار
-  maxFileMB: 20, maxVideoSeconds: 60, maxImageWidth: 1280, imageQuality: 0.75, keepDays: 7
+  maxFileMB: 20, compressVideoAboveMB: 2, videoMaxSide: 720, videoBitrate: 1000000, videoFps: 30, maxVideoSeconds: 60, maxImageWidth: 1280, imageQuality: 0.75, keepDays: 7
 };
 // =================================
 
@@ -197,6 +201,20 @@ function toast(t) {
 }
 const lsGet = k => { try { return localStorage.getItem(k); } catch { return null; } };
 const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch {} };
+const posterUrl = id => `${CONFIG.endpoint}/storage/buckets/${CONFIG.bucketId}/files/${id}_p/view?project=${CONFIG.projectId}`;
+// نشانگر «در حال بارگذاری» برای ویدیو
+function attachLoader(v, host) {
+  const box = h('div', { class: 'vload' }, h('i', {}), h('span', {}, 'در حال بارگذاری...'));
+  const txt = box.querySelector('span');
+  const on = m => { txt.textContent = m || 'در حال بارگذاری...'; box.classList.add('on'); };
+  const off = () => box.classList.remove('on');
+  ['waiting', 'stalled'].forEach(e => v.addEventListener(e, () => { if (v.readyState < 3 && !v.error) on(); }));
+  v.addEventListener('play', () => { if (v.readyState < 3) on(); });
+  ['playing', 'canplay', 'pause', 'ended'].forEach(e => v.addEventListener(e, off));
+  v.addEventListener('error', () => on('ویدیو بارگذاری نشد؛ اینترنتت رو چک کن'));
+  host.append(box);
+  return box;
+}
 const fileUrl = id => `${CONFIG.endpoint}/storage/buckets/${CONFIG.bucketId}/files/${id}/view?project=${CONFIG.projectId}`;
 function timeAgo(iso) {
   const s = (Date.now() - new Date(iso)) / 1000;
@@ -693,13 +711,13 @@ function reelItem(d, onRemoved) {
   const files = (meta && meta.by === d.userId && meta.files && meta.files.length) ? meta.files : (d.fileId && d.fileId !== 'none' ? [{ id: d.fileId, type: d.type }] : []);
   let mainVideo = null;
   const mk = f => {
-    if (f.type === 'video') return h('video', { src: fileUrl(f.id), playsinline: '', loop: '', preload: 'metadata', muted: '' });
+    if (f.type === 'video') return h('video', { src: fileUrl(f.id), poster: posterUrl(f.id), playsinline: '', loop: '', preload: 'metadata', muted: '' });
     return h('img', { class: 'full', src: fileUrl(f.id), alt: '', loading: 'lazy' });
   };
   if (files.length === 1) {
     const m = mk(files[0]); el.append(m);
     if (files[0].type === 'video') {
-      mainVideo = m; m._postId = d.$id; m.muted = true;
+      mainVideo = m; m._postId = d.$id; m.muted = true; attachLoader(m, el);
       m.onclick = () => { if (m.paused) m.play(); else m.pause(); };
       m.onpause = () => sendWatch(d.$id, m.currentTime);
       ro.observe(m);
@@ -707,7 +725,7 @@ function reelItem(d, onRemoved) {
   } else if (files.length > 1) {
     const car = h('div', { class: 'car' });
     const cnt = h('div', { class: 'cnt' }, '1/' + files.length);
-    files.forEach(f => { const w = h('div', {}); const m = mk(f); if (f.type === 'video') { m.controls = true; m.removeAttribute('loop'); } else m.className = ''; w.append(m); car.append(w); });
+    files.forEach(f => { const w = h('div', {}); const m = mk(f); if (f.type === 'video') { m.controls = true; m.removeAttribute('loop'); attachLoader(m, w); } else m.className = ''; w.append(m); car.append(w); });
     car.onscroll = () => { cnt.textContent = (Math.round(Math.abs(car.scrollLeft) / car.clientWidth) + 1) + '/' + files.length; };
     el.append(car, cnt);
   } else {
@@ -802,7 +820,7 @@ function thumb(d, opts) {
   const meta = A.meta.get(d.$id);
   const f = (meta && meta.by === d.userId && meta.files && meta.files[0]) || (d.fileId && d.fileId !== 'none' ? { id: d.fileId, type: d.type } : null);
   const a = h('a', { class: 'th', href: '#/p/' + d.$id });
-  if (f && f.type === 'video') a.append(h('video', { src: fileUrl(f.id) + '#t=0.1', preload: 'metadata', muted: '', playsinline: '' }));
+  if (f && f.type === 'video') a.append(h('video', { src: fileUrl(f.id) + '#t=0.1', poster: posterUrl(f.id), preload: 'metadata', muted: '', playsinline: '' }));
   else if (f) a.append(h('img', { src: fileUrl(f.id), alt: '', loading: 'lazy' }));
   else a.append(h('div', { class: 'tx' }, (d.text || '').slice(0, 90)));
   if (opts.pinned) a.append(h('span', { class: 'pin' }, '📌'));
@@ -909,7 +927,7 @@ function openStory(uid) {
     const bar = h('div', { class: 'sbar' }, h('i', {}));
     const media = h('div', { class: 'sm' });
     const next = () => { if (i < list.length - 1) { i++; show(); } else close(); };
-    if (data.type === 'video') { const v = h('video', { src: fileUrl(data.fileId), autoplay: '', playsinline: '' }); v.onended = next; media.append(v); }
+    if (data.type === 'video') { const v = h('video', { src: fileUrl(data.fileId), poster: posterUrl(data.fileId), autoplay: '', playsinline: '' }); v.onended = next; media.append(v); attachLoader(v, media); }
     else { media.append(h('img', { src: fileUrl(data.fileId), alt: '' })); timer = setTimeout(next, 5000); }
     if (data.text) media.append(h('div', { class: 'stxt' }, data.text));
     const left = h('div', { style: 'position:absolute;top:60px;bottom:80px;right:0;width:40%;z-index:2', onclick: () => { if (i > 0) { i--; show(); } } });
@@ -1180,14 +1198,93 @@ function videoDuration(file) {
     v.src = URL.createObjectURL(file);
   });
 }
+// ---- فشرده‌سازی ویدیو (داخل خود گوشی) ----
+function pickVideoMime() {
+  if (!window.MediaRecorder) return '';
+  const c = ['video/mp4;codecs=avc1.42E01E,mp4a.40.2', 'video/mp4', 'video/webm;codecs=vp8,opus', 'video/webm;codecs=vp9,opus', 'video/webm'];
+  return c.find(m => { try { return MediaRecorder.isTypeSupported(m); } catch { return false; } }) || '';
+}
+// اگه فشرده‌سازی نشد یا فایل کوچک‌تر نشد، همون فایل اصلی برمی‌گرده
+async function compressVideo(file, status) {
+  const mime = pickVideoMime();
+  const cv = document.createElement('canvas');
+  if (!mime || !cv.captureStream || file.size < CONFIG.compressVideoAboveMB * 1048576) return file;
+  const v = document.createElement('video');
+  v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
+  let ctx = null;
+  const done = () => { try { v.pause(); } catch {} try { URL.revokeObjectURL(v.src); } catch {} try { ctx && ctx.close(); } catch {} };
+  try {
+    await new Promise((ok, no) => { v.onloadeddata = ok; v.onerror = () => no('x'); });
+    const dur = v.duration;
+    if (!isFinite(dur) || dur <= 0) { done(); return file; }
+    const s = Math.min(1, CONFIG.videoMaxSide / Math.max(v.videoWidth, v.videoHeight));
+    cv.width = Math.max(2, Math.round(v.videoWidth * s / 2) * 2); cv.height = Math.max(2, Math.round(v.videoHeight * s / 2) * 2);
+    const g = cv.getContext('2d');
+    const stream = cv.captureStream(CONFIG.videoFps);
+    try {
+      const AC = window.AudioContext || window.webkitAudioContext;
+      ctx = new AC(); if (ctx.state === 'suspended') await ctx.resume();
+      const dest = ctx.createMediaStreamDestination();
+      ctx.createMediaElementSource(v).connect(dest);   // صدا فقط ضبط می‌شه، از بلندگو پخش نمی‌شه
+      dest.stream.getAudioTracks().forEach(t => stream.addTrack(t));
+    } catch { /* بدون صدا */ }
+    const rec = new MediaRecorder(stream, { mimeType: mime, videoBitsPerSecond: CONFIG.videoBitrate, audioBitsPerSecond: 64000 });
+    const chunks = [];
+    rec.ondataavailable = e => { if (e.data && e.data.size) chunks.push(e.data); };
+    const finished = new Promise(res => { rec.onstop = res; });
+    let alive = true;
+    const draw = () => {
+      if (!alive) return;
+      g.drawImage(v, 0, 0, cv.width, cv.height);
+      status.textContent = `در حال فشرده‌سازی ویدیو... ${Math.min(99, Math.round(v.currentTime / dur * 100))}٪ (صفحه رو باز نگه دار)`;
+      requestAnimationFrame(draw);
+    };
+    v.onended = () => { alive = false; setTimeout(() => { try { rec.stop(); } catch {} }, 300); };
+    await v.play();
+    rec.start(1000); draw();
+    const guard = setTimeout(() => { alive = false; try { rec.stop(); } catch {} }, (dur * 2 + 20) * 1000);
+    await finished; clearTimeout(guard);
+    const ended = v.ended || v.currentTime >= dur - 0.5;
+    done();
+    if (!ended) return file;
+    const type = mime.split(';')[0];
+    const out = new Blob(chunks, { type });
+    if (!out.size || out.size >= file.size * 0.9) return file;
+    return new File([out], 'video.' + (type === 'video/mp4' ? 'mp4' : 'webm'), { type });
+  } catch (e) { done(); return file; }
+}
+// عکس پیش‌نمایش (poster) از ویدیو
+function videoPoster(file) {
+  return new Promise(resolve => {
+    const v = document.createElement('video');
+    v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = URL.createObjectURL(file);
+    const end = r => { try { URL.revokeObjectURL(v.src); } catch {} resolve(r); };
+    setTimeout(() => end(null), 15000);
+    v.onerror = () => end(null);
+    v.onloadeddata = () => { v.currentTime = Math.min(0.5, (v.duration || 1) / 2); };
+    v.onseeked = () => {
+      try {
+        const s = Math.min(1, 480 / v.videoWidth), c = document.createElement('canvas');
+        c.width = Math.round(v.videoWidth * s); c.height = Math.round(v.videoHeight * s);
+        c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+        c.toBlob(b => end(b ? new File([b], 'poster.jpg', { type: 'image/jpeg' }) : null), 'image/jpeg', 0.7);
+      } catch { end(null); }
+    };
+  });
+}
 async function uploadMedia(f, status) {
   let upload = f, type;
   if (f.type.startsWith('image/')) { type = 'image'; status.textContent = 'در حال فشرده‌سازی عکس...'; upload = await compressImage(f, CONFIG.maxImageWidth, CONFIG.imageQuality); }
-  else if (f.type.startsWith('video/')) { type = 'video'; if ((await videoDuration(f)) > CONFIG.maxVideoSeconds) throw `ویدیو باید حداکثر ${CONFIG.maxVideoSeconds} ثانیه باشه`; }
+  else if (f.type.startsWith('video/')) { type = 'video'; if ((await videoDuration(f)) > CONFIG.maxVideoSeconds) throw `ویدیو باید حداکثر ${CONFIG.maxVideoSeconds} ثانیه باشه`; upload = await compressVideo(f, status); }
   else throw 'فقط عکس یا ویدیو';
   if (upload.size > CONFIG.maxFileMB * 1024 * 1024) throw `حجم هر فایل باید کمتر از ${CONFIG.maxFileMB} مگابایت باشه`;
   status.textContent = 'در حال آپلود...';
-  const saved = await storage.createFile(CONFIG.bucketId, ID.unique(), upload, [Permission.read(Role.any()), Permission.delete(Role.user(user.$id))]);
+  const perms = [Permission.read(Role.any()), Permission.delete(Role.user(user.$id))];
+  const fid = ID.unique();
+  const saved = await storage.createFile(CONFIG.bucketId, fid, upload, perms);
+  if (type === 'video') {   // پیش‌نمایش با شناسه‌ی «<id>_p»؛ اگه نشد مشکلی نیست
+    try { const pf = await videoPoster(f); if (pf) await storage.createFile(CONFIG.bucketId, fid + '_p', pf, perms); } catch {}
+  }
   return { id: saved.$id, type };
 }
 function viewNew(asStory) {
