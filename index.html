@@ -122,6 +122,35 @@
   .sendbar { display:flex; gap:8px; position:sticky; bottom:calc(var(--navh) + 4px); background:var(--bg); padding:8px 0; }
   table.st { width:100%; border-collapse:collapse; font-size:13px; }
   table.st td, table.st th { border-bottom:1px solid var(--line); padding:4px; text-align:center; }
+
+  /* ---- ظاهر گرد و بدون لبه ---- */
+  :root { --r-sm:14px; --r-md:20px; --r-lg:26px; }
+  button { border-radius:999px; padding:10px 20px; }
+  button.small, button.danger { padding:5px 14px; }
+  input, select { border-radius:var(--r-sm); padding:11px 16px; }
+  textarea { border-radius:var(--r-md); padding:12px 16px; }
+  .box { border-radius:var(--r-lg); padding:20px; }
+  header { border-radius:0 0 var(--r-md) var(--r-md); }
+  nav { border-radius:var(--r-lg) var(--r-lg) 0 0; box-shadow:0 -4px 18px rgba(0,0,0,.08); }
+  #msg { border-radius:999px; text-align:center; }
+  .tab { border-radius:999px; }
+  .grid { gap:6px; }
+  .th { border-radius:var(--r-sm); }
+  .sheet { border-radius:28px 28px 0 0; }
+  .sheet .sb button.menu { border-radius:var(--r-sm); padding:12px 16px; }
+  .poll { border-radius:var(--r-md); }
+  .poll button { border-radius:var(--r-sm); }
+  .b { border-radius:20px; padding:9px 14px; }
+  .cm img.cmimg, .t img.cmimg { border-radius:var(--r-sm); }
+  .ri .cnt { border-radius:999px; }
+
+  /* ---- نوار پایین شناور و کپسولی ---- */
+  :root { --navh:calc(80px + env(safe-area-inset-bottom,0px)); }
+  nav { right:12px; left:12px; bottom:calc(10px + env(safe-area-inset-bottom,0px)); max-width:520px; margin:0 auto; padding:6px; gap:4px; align-items:center; justify-content:space-between; border:1px solid var(--line); border-radius:999px; background:var(--card); box-shadow:0 8px 24px rgba(0,0,0,.18); }
+  @supports (backdrop-filter:blur(10px)) { nav { background:color-mix(in srgb, var(--card) 86%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); } }
+  nav a { flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:6px; height:46px; min-width:46px; padding:0 12px; border-radius:999px; font-size:0; color:var(--muted); transition:background .2s, padding .2s; }
+  nav a .ic { display:inline; font-size:23px; line-height:1; }
+  nav a.on { background:var(--accent); color:var(--accent-ink); font-size:13px; font-weight:bold; padding:0 18px; }
 </style>
 </head>
 <body>
