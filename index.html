@@ -1,13 +1,15 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-    <title>تجربه‌ها</title>
-    <script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.0"></script>
-    <script>window.Appwrite||document.write('<script src="https://unpkg.com/appwrite@16.0.0"><\/script>')</script>
-    <script>window.Appwrite||document.write('<script src="https://gcore.jsdelivr.net/npm/appwrite@16.0.0"><\/script>')</script>
-    <style>
+<head>
+<meta charset="UTF-8">
+<meta name="theme-color" content="#f4f2ed" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1315" media="(prefers-color-scheme: dark)">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>تجربه‌ها</title>
+<script src="https://cdn.jsdelivr.net/npm/appwrite@16.0.0"></script>
+<script>window.Appwrite||document.write('<script src="https://unpkg.com/appwrite@16.0.0"><\/script>')</script>
+<script>window.Appwrite||document.write('<script src="https://gcore.jsdelivr.net/npm/appwrite@16.0.0"><\/script>')</script>
+<style>
   :root { --bg:#f6f3ee; --card:#ffffff; --ink:#1d2a2a; --muted:#6b7777; --accent:#1f6f6b; --accent-ink:#ffffff; --line:#e3ded5; --danger:#b3412f; --navh:calc(62px + env(safe-area-inset-bottom,0px)); }
   :root[data-theme="dark"] { --bg:#14181a; --card:#1d2326; --ink:#e8eeee; --muted:#9aa8a8; --accent:#3fb6ad; --accent-ink:#0b1414; --line:#2c3538; --danger:#e07a67; }
   * { box-sizing:border-box; }
@@ -151,34 +153,104 @@
   nav a { flex:0 0 auto; display:flex; align-items:center; justify-content:center; gap:6px; height:46px; min-width:46px; padding:0 12px; border-radius:999px; font-size:0; color:var(--muted); transition:background .2s, padding .2s; }
   nav a .ic { display:inline; font-size:23px; line-height:1; }
   nav a.on { background:var(--accent); color:var(--accent-ink); font-size:13px; font-weight:bold; padding:0 18px; }
+
+  /* ================= پرداخت نهایی ظاهر (خوش‌دستی) ================= */
+  :root { --bg:#f4f2ed; --line:#e6e1d8; --field:#f1eee8; --accent-soft:rgba(31,111,107,.10); --shadow:0 1px 2px rgba(20,30,30,.05), 0 8px 24px rgba(20,30,30,.07); }
+  :root[data-theme="dark"] { --bg:#0f1315; --card:#1a2124; --line:#2a3337; --field:#232b2e; --accent-soft:rgba(63,182,173,.16); --shadow:0 1px 2px rgba(0,0,0,.3), 0 8px 24px rgba(0,0,0,.35); }
+  html { -webkit-text-size-adjust:100%; }
+  body { font-size:16px; line-height:1.7; -webkit-tap-highlight-color:transparent; overscroll-behavior-y:none; -webkit-font-smoothing:antialiased; }
+  a, button, input, textarea, select, label { touch-action:manipulation; }
+  .tabs, .tray, .reel, .sheet .sb, .car { scrollbar-width:none; }
+  .tabs::-webkit-scrollbar, .tray::-webkit-scrollbar, .reel::-webkit-scrollbar, .sheet .sb::-webkit-scrollbar, .car::-webkit-scrollbar { display:none; }
+
+  /* هدر */
+  header { border-bottom:none; box-shadow:0 2px 14px rgba(20,30,30,.06); }
+  @supports (backdrop-filter:blur(10px)) { header { background:color-mix(in srgb, var(--card) 85%, transparent); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); } }
+  header h1 { font-size:21px; font-weight:800; letter-spacing:-.2px; }
+
+  /* دکمه‌ها: بزرگ‌تر برای انگشت + حس فشردن */
+  button { min-height:44px; font-weight:600; transition:transform .12s ease, opacity .15s, background .15s; }
+  button.small, button.danger { min-height:36px; }
+  button:active:not(:disabled) { transform:scale(.95); }
+  button.ghost { background:var(--accent-soft); border-color:transparent; }
+  button.danger { background:transparent; }
+  .sbtn, .th .x, .rtop button.ic, .tray button.st, .story .sfoot button { min-height:0; }
+
+  /* ورودی‌ها */
+  input, textarea, select { background:var(--field); border:1.5px solid transparent; transition:border-color .15s, background .15s; }
+  input:focus, textarea:focus, select:focus { outline:none; border-color:var(--accent); background:var(--card); }
+  input[type=checkbox] { accent-color:var(--accent); width:20px; height:20px; }
+  button:focus-visible, a:focus-visible { outline:3px solid var(--accent-soft); outline-offset:2px; box-shadow:0 0 0 2px var(--accent); }
+
+  /* کارت‌ها */
+  .box { border:none; box-shadow:var(--shadow); }
+  .chip { border:none; background:var(--field); }
+  .tab { background:var(--field); border-color:transparent; font-weight:600; }
+  .tab.on { box-shadow:0 4px 12px var(--accent-soft); }
+  main > * { animation:rise .3s ease both; }
+  body.reelmode main > * { animation:none; }
+  @keyframes rise { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:none; } }
+
+  /* فید تمام‌صفحه */
+  .ri .shade { height:55%; background:linear-gradient(transparent, rgba(0,0,0,.35) 40%, rgba(0,0,0,.82)); }
+  .ri .info { text-shadow:0 1px 4px rgba(0,0,0,.7); font-size:15px; }
+  .ri .side { gap:12px; left:10px; }
+  .sbtn { min-width:54px; padding:8px 4px; background:rgba(0,0,0,.32); transition:transform .12s; }
+  @supports (backdrop-filter:blur(8px)) { .sbtn { backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); } }
+  .sbtn:active { transform:scale(.88); }
+  .sbtn.on { animation:pop .35s ease; }
+  @keyframes pop { 0% { transform:scale(.7); } 60% { transform:scale(1.25); } 100% { transform:scale(1); } }
+  .rtop .tab { font-size:16px; font-weight:700; }
+  .rtop .tab.on { border-bottom-width:3px; }
+
+  /* پنجره‌ی پایین‌آمدنده */
+  .sheet { box-shadow:0 -10px 40px rgba(0,0,0,.25); animation:sheetUp .25s cubic-bezier(.2,.8,.2,1); }
+  .sheet::before { content:''; display:block; width:40px; height:4px; border-radius:4px; background:var(--line); margin:8px auto 0; flex:none; }
+  .sheet .sh { border-bottom:none; padding-top:8px; }
+  .backdrop { animation:fade .2s ease; }
+  @supports (backdrop-filter:blur(4px)) { .backdrop { backdrop-filter:blur(3px); -webkit-backdrop-filter:blur(3px); } }
+  @keyframes sheetUp { from { transform:translateY(40px); opacity:0; } to { transform:none; opacity:1; } }
+  @keyframes fade { from { opacity:0; } to { opacity:1; } }
+
+  /* چت */
+  .b { border:none; box-shadow:0 1px 2px rgba(20,30,30,.08); border-bottom-left-radius:6px; }
+  .b.me { border-bottom-left-radius:20px; border-bottom-right-radius:6px; }
+  .sendbar { padding:8px 0 4px; }
+  .sendbar input { margin-bottom:0; border-radius:999px; }
+
+  /* شبکه */
+  .th { transition:transform .15s; }
+  .th:active { transform:scale(.96); }
+
+  /* پیام کوتاه */
+  #msg { box-shadow:0 8px 24px rgba(0,0,0,.25); animation:rise .25s ease; }
+
+  @media (prefers-reduced-motion:reduce) { *, *::before, *::after { animation:none !important; transition:none !important; } }
 </style>
-  </head>
-  <body>
-    <header>
-      <h1>تجربه‌ها</h1>
-      <div class="row">
-        <button id="bellBtn" class="ghost small" aria-label="اعلان‌ها" style="display:none">🔔</button>
-        <button id="themeBtn" class="ghost small" aria-label="حالت تاریک">🌙</button>
-        <button id="loginTop" class="ghost small" style="display:none">ورود / ثبت‌نام</button>
-      </div>
-    </header>
-    <main id="view">
-    </main>
-    <nav>
-      <a href="#/posts" data-p="posts">
-        <span class="ic">⌂</span>پست‌ها</a>
-        <a href="#/search" data-p="search">
-          <span class="ic">⌕</span>جستجو</a>
-          <a href="#/new" data-p="new">
-            <span class="ic">＋</span>پست جدید</a>
-            <a href="#/chat" data-p="chat">
-              <span class="ic">✉</span>چت</a>
-              <a href="#/me" data-p="me">
-                <span class="ic">☺</span>صفحه من</a>
-              </nav>
-              <div id="msg">
-              </div>
-              <script>
+</head>
+<body>
+
+<header>
+  <h1>تجربه‌ها</h1>
+  <div class="row">
+    <button id="bellBtn" class="ghost small" aria-label="اعلان‌ها" style="display:none">🔔</button>
+    <button id="themeBtn" class="ghost small" aria-label="حالت تاریک">🌙</button>
+    <button id="loginTop" class="ghost small" style="display:none">ورود / ثبت‌نام</button>
+  </div>
+</header>
+
+<main id="view"></main>
+
+<nav>
+  <a href="#/posts" data-p="posts"><span class="ic">⌂</span>پست‌ها</a>
+  <a href="#/search" data-p="search"><span class="ic">⌕</span>جستجو</a>
+  <a href="#/new" data-p="new"><span class="ic">＋</span>پست جدید</a>
+  <a href="#/chat" data-p="chat"><span class="ic">✉</span>چت</a>
+  <a href="#/me" data-p="me"><span class="ic">☺</span>صفحه من</a>
+</nav>
+
+<div id="msg"></div>
+<script>
 // ============ تنظیمات ============
 const CONFIG = {
   endpoint: 'https://fra.cloud.appwrite.io/v1',
@@ -371,7 +443,7 @@ function addRow(doc) { A.rows.unshift(doc); indexActions(); }
 function removeRow(id) { A.rows = A.rows.filter(r => r.$id !== id); indexActions(); }
 async function fetchAdmin(force) {
   if (!adminReady()) return;
-  if (!force && AD.loaded && Date.now() - AD.loaded < 60000) return;
+  if (!force && AD.loaded && Date.now() - AD.loaded < 15000) return;
   try { AD.rows = await pageAll(CONFIG.adminId, [Query.orderDesc('$createdAt')], 5); } catch { AD.rows = []; }
   AD.loaded = Date.now();
   AD.verified = new Set(); AD.premium = new Map(); AD.bans = new Map(); AD.ads = []; AD.all = 0;
@@ -381,13 +453,12 @@ async function fetchAdmin(force) {
     if (r.kind === 'verified') AD.verified.add(r.targetId);
     else if (r.kind === 'premium' && until > now) AD.premium.set(r.targetId, until);
     else if (r.kind === 'ban' && until > now) AD.bans.set(r.targetId, { until, reason: r.text, id: r.$id });
-    else if (r.kind === 'premiumall' && until > now) AD.all = Math.max(AD.all, until);
     else if (r.kind === 'ad') AD.ads.push({ id: r.$id, fileId: r.targetId, ...jparse(r.text) });
   }
 }
 const isVerified = uid => AD.verified.has(uid);
 const isRealPremium = uid => !!uid && AD.premium.has(uid);              // اشتراک شخصی (برای تیک و نشان)
-const premiumForAll = () => AD.all > Date.now();                          // پرمیوم همگانی روشنه؟
+const premiumForAll = () => (AD.premium.get('all') || 0) > Date.now();                          // پرمیوم همگانی روشنه؟
 const isPremium = uid => premiumForAll() || isRealPremium(uid);          // دسترسی به امکانات پرمیوم
 async function act(fn) {
   if (!user) { toast('اول وارد شو'); return false; }
@@ -395,7 +466,7 @@ async function act(fn) {
   try { await fn(); return true; } catch (e) { toast(e.message || 'انجام نشد'); return false; }
 }
 const nameOf = (uid, fallback) => A.names.get(uid) || fallback || 'کاربر';
-function nameEl(uid, fallback) { return h('span', {}, nameOf(uid, fallback), (isVerified(uid) || isRealPremium(uid)) && h('span', { class: 'tick', title: 'تأییدشده' }, '✔')); }
+function nameEl(uid, fallback) { return h('span', {}, nameOf(uid, fallback), isVerified(uid) && h('span', { class: 'tick', title: 'تأییدشده' }, '✔')); }
 function adContact() { return h('span', {}, 'تلگرام ', h('b', { dir: 'ltr' }, CONFIG.supportTelegram), ' یا ایتا ', h('b', { dir: 'ltr' }, CONFIG.supportEitaa)); }
 function avatar(uid, name, big) {
   const p = A.profiles.get(uid);
@@ -769,7 +840,7 @@ function reelItem(d, onRemoved) {
   el.append(h('div', { class: 'shade' }));
 
   // تبلیغ قبل از ویدیو برای کسایی که اشتراک ندارن
-  if (mainVideo && !own(d.userId) && !isPremium(user && user.$id)) {
+  if (mainVideo && !own(d.userId)) {
     mainVideo._hold = true;
     const ad = h('div', { class: 'ad' });
     el.append(ad);
@@ -777,6 +848,7 @@ function reelItem(d, onRemoved) {
     const buy = h('div', { style: 'position:absolute;right:12px;left:12px;bottom:16px;text-align:center;font-size:13px;text-shadow:0 1px 3px #000;z-index:4' },
       'حذف تبلیغات و تیک آبی (' + CONFIG.premiumPrice + '): ', adContact());
     const startAd = () => {
+      if (isPremium(user && user.$id)) { finish(); return; }   // پرمیوم (شخصی یا همگانی): بدون تبلیغ
       const pick = AD.ads.length ? AD.ads[Math.floor(Math.random() * AD.ads.length)] : null;
       if (!pick) {
         ad.append(h('div', { style: 'font-size:18px;margin-bottom:8px' }, 'حمایت و رفع تبلیغات'), h('div', {}, 'برای خرید اشتراک پرمیوم (' + CONFIG.premiumPrice + ') پیام بده: ', adContact()));
@@ -1568,6 +1640,7 @@ function viewRules() {
   view.append(h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'قوانین'),
     h('ul', {}, ['کپی‌رایت ممنوعه: محتوای دیگران رو بدون اجازه نذار.', 'فحاشی ممنوعه.', 'برای اینکه تبلیغاتتون رو پخش کنیم هم به پشتیبانی پیام بدید و ویدیوتون رو ارسال کنید', 'محتوای نامناسب ممنوعه.', 'ادمین‌ها می‌تونن پست رو حذف و کاربر رو برای مدت مشخص بن کنن.'].map(x => h('li', {}, x)))),
     h('section', { class: 'box' }, h('h2', { style: 'margin-top:0' }, 'اشتراک پرمیوم'),
+      premiumForAll() && h('p', {}, '🎁 الان پرمیوم برای همه فعاله: بدون تبلیغ و با امکان گیف و عکس تو کامنت.'),
       h('p', {}, `حداقل مبلغ حمایت برای اشتراک: ${CONFIG.premiumPrice}`),
       h('p', {}, 'با اشتراک تبلیغات نمی‌بینی، تیک آبی می‌گیری و می‌تونی تو کامنت‌ها گیف و عکس بذاری.'),
       CONFIG.cardNumber && h('p', {}, 'شماره کارت: ', h('b', { dir: 'ltr' }, CONFIG.cardNumber)),
@@ -1609,24 +1682,24 @@ async function viewAdmin() {
   if (!adminReady()) { view.append(h('div', { class: 'box' }, 'جدول ادمین هنوز تو تنظیمات (adminId) گذاشته نشده.')); return; }
   {
     const on = premiumForAll();
-    const info = h('p', { class: 'muted' }, on ? ('✅ الان برای همه فعاله' + (isFinite(AD.all) ? ' (تا ' + new Date(AD.all).toLocaleDateString('fa-IR') + ')' : ' (تا وقتی غیرفعالش کنی)')) : 'الان خاموشه؛ فقط کاربرای دارای اشتراک پرمیوم دارن.');
+    const info = h('p', { class: 'muted' }, on ? ('✅ الان برای همه فعاله' + (isFinite(AD.premium.get('all')) ? ' (تا ' + new Date(AD.premium.get('all')).toLocaleDateString('fa-IR') + ')' : ' (تا وقتی غیرفعالش کنی)')) : 'الان خاموشه؛ فقط کاربرای دارای اشتراک پرمیوم دارن.');
     const btn = h('button', on ? { class: 'danger' } : {}, on ? 'غیرفعال کردن برای همه' : 'فعال کردن برای همه');
     btn.onclick = async () => {
       btn.disabled = true;
       try {
-        if (on) { if (!confirm('پرمیوم برای همه غیرفعال بشه؟')) { btn.disabled = false; return; } await adminDel('premiumall', 'all'); toast('پرمیوم همگانی غیرفعال شد'); }
+        if (on) { if (!confirm('پرمیوم برای همه غیرفعال بشه؟')) { btn.disabled = false; return; } await adminDel('premium', 'all'); toast('پرمیوم همگانی غیرفعال شد'); }
         else {
           const v = prompt('برای چند روز فعال باشه؟ (خالی بذار = تا وقتی خودت غیرفعالش کنی)', '');
           if (v === null) { btn.disabled = false; return; }
           const days = parseInt(v, 10);
-          await adminPut('premiumall', 'all', days > 0 ? days : 0, ''); toast('پرمیوم برای همه فعال شد');
+          await adminPut('premium', 'all', days > 0 ? days : 0, ''); toast('پرمیوم برای همه فعال شد');
         }
         await fetchAdmin(true); route(); return;
       } catch (e) { toast(e.message || 'انجام نشد'); }
       btn.disabled = false;
     };
     view.append(h('div', { class: 'box' }, h('h3', { style: 'margin-top:0' }, '⭐ پرمیوم برای همه'),
-      h('p', { class: 'muted' }, 'وقتی روشن باشه همه‌ی کاربرا بدون تبلیغ هستن و می‌تونن گیف و عکس بذارن. تیک آبی فقط برای کسایی می‌مونه که اشتراک دارن.'), info, btn));
+      h('p', { class: 'muted' }, 'وقتی روشن باشه همه‌ی کاربرا بدون تبلیغ هستن و می‌تونن گیف و عکس بذارن. تیک آبی با این کلید داده نمی‌شه و فقط خودت می‌تونی بدی.'), info, btn));
   }
   const q = h('input', { placeholder: 'اسم کاربر رو بنویس' });
   const res = h('div');
@@ -1668,7 +1741,7 @@ async function viewAdmin() {
       h('button', { class: 'danger', onclick: async () => { if (!confirm('این تبلیغ حذف بشه؟')) return; try { await databases.deleteDocument(DB, CONFIG.adminId, a.id); try { await storage.deleteFile(CONFIG.bucketId, a.fileId); } catch {} await fetchAdmin(true); route(); } catch (e) { toast(e.message || 'حذف نشد'); } } }, 'حذف')))));
   const sec = (title, items) => { view.append(h('h3', {}, title)); if (!items.length) view.append(h('div', { class: 'muted' }, '—')); items.forEach(x => view.append(x)); };
   sec('بن‌شده‌ها', [...AD.bans].map(([id, b]) => h('div', {}, nameOf(id, null) + ' تا ' + new Date(b.until).toLocaleDateString('fa-IR') + (b.reason ? ' (' + b.reason + ')' : ''))));
-  sec('پرمیوم‌ها', [...AD.premium].map(([id, u]) => h('div', {}, nameOf(id, null) + ' تا ' + new Date(u).toLocaleDateString('fa-IR'))));
+  sec('پرمیوم‌ها', [...AD.premium].filter(([id]) => id !== 'all').map(([id, u]) => h('div', {}, nameOf(id, null) + ' تا ' + new Date(u).toLocaleDateString('fa-IR'))));
   sec('تیک آبی‌ها', [...AD.verified].map(id => h('div', {}, nameOf(id, null))));
   if (CONFIG.reportsId) {
     view.append(h('h3', {}, 'گزارش‌ها و پیام‌های پشتیبانی'));
@@ -1766,5 +1839,5 @@ window.addEventListener('hashchange', route);
   route();
 })();
 </script>
-            </body>
-          </html>
+</body>
+</html>
