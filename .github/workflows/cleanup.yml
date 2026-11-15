@@ -15,13 +15,13 @@ jobs:
           node-version: 20
       - name: Keep project active
         run: |
-          curl -s -o /dev/null -H "X-Appwrite-Project: 6af996bf0006eaf2735f" "https://fra.cloud.appwrite.io/v1/databases/6af0bf6c0026900fa6e2/collections/6acf990e0020720c9550/documents?queries%5B%5D=%7B%22method%22%3A%22limit%22%2C%22values%22%3A%5B1%5D%7D"
+          curl -s -o /dev/null -H "X-Appwrite-Project: 6af996bf0006eaf2735f" "https://fra.cloud.appwrite.io/v1/databases/6acf982f001971779a2c/collections/6acf990e0020720c9550/documents?queries%5B%5D=%7B%22method%22%3A%22limit%22%2C%22values%22%3A%5B1%5D%7D"
       - name: Delete old data
         run: node cleanup.mjs
         env:
           APPWRITE_ENDPOINT: https://fra.cloud.appwrite.io/v1
           APPWRITE_PROJECT: 6af996bf0006eaf2735f
-          APPWRITE_DB: 6af0bf6c0026900fa6e2
+          APPWRITE_DB: 6acf982f001971779a2c
           APPWRITE_COLLECTION: 6acf990e0020720c9550
           APPWRITE_MESSAGES: 6ad0beeb0037f9256400
           APPWRITE_ACTIONS: 6ad1b34a000658debecf
